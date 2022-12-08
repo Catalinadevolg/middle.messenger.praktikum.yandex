@@ -1,0 +1,15 @@
+.button-wrapper {
+    margin: auto;
+    width: 280px;
+    padding: 12px 0;
+    font-size: 13px;
+    line-height: 13px;
+    border-radius: 8px;
+    background-color: var(--btn-blue-color);
+}
+.button-wrapper:hover {
+    background-color: var(--btn-hover-color);
+}
+.button {
+    color: var(--white-color);
+}
