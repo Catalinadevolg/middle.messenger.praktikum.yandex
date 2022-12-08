@@ -1,0 +1,23 @@
+.error-page {
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+}
+.error-page__title {
+    font-size: 40px;
+    line-height: 40px;
+}
+.error-page__text {
+    margin: 20px 0 69px 0;
+    font-size: 20px;
+    line-height: 20px;
+}
+.error-page__link {
+    margin: auto;
+    font-size: 11px;
+    line-height: 11px;
+    color: var(--link-blue-color);
+}
+.error-page__link:hover {
+    border-bottom: 1px solid rgba(51, 105, 243, 1);
+}
