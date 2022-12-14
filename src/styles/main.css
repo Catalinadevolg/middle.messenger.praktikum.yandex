@@ -1,12 +1,12 @@
-@import "./reset.css";
-@import "./page.css";
-@import "../components/input/input.css";
-@import "../components/button/button.css";
-@import "../components/chat-list-item/chat-list-item.css";
-@import "../components/chat-box-item/chat-box-item.css";
-@import "../components/profile-line/profile-line.css";
-@import "../pages/errors/errors.css";
-@import "../pages/formpages/formpages.css";
-@import "../pages/messenger/messenger.css";
-@import "../pages/profile/profile.css";
+@import url("./reset.css");
+@import url("./page.css");
+@import url("../components/input/input.css");
+@import url("../components/button/button.css");
+@import url("../components/chat-list-item/chat-list-item.css");
+@import url("../components/chat-box-item/chat-box-item.css");
+@import url("../components/profile-line/profile-line.css");
+@import url("../pages/errors/errors.css");
+@import url("../pages/formpages/formpages.css");
+@import url("../pages/messenger/messenger.css");
+@import url("../pages/profile/profile.css");
 
