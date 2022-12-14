@@ -57,10 +57,10 @@
     background-color: inherit;
 }
 .chat-box__settings-btn:hover {
-    background-color: #F5F5F5;
+    background-color: var(--light-gray-background-color);
 }
 .chat-box__settings-btn:focus {
-    background-color: #F5F5F5;
+    background-color: var(--light-gray-background-color);
 }
 .chat-box__settings-btn:hover .btn-point {
     background-color: var(--btn-blue-color);

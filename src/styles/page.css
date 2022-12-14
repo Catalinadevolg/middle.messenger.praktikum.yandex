@@ -11,6 +11,7 @@
     --main-text-color: #1E1E1E;
     --light-gray-text-color: #999999;
     --gray-line-color: #EAEAEA;
+    --light-gray-background-color: #f5f5f5;
 }
 .page {
     font-family: 'Inter';
