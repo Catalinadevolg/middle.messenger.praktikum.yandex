@@ -1,0 +1,26 @@
+---
+stylesheets:
+  - ../../styles/main.css
+---
+
+{{!< page}}
+<div class="form-page signup">
+  <div class="form-page__container">
+    <h1 class="form-page__title">Регистрация</h1>
+    <form class="form-page__form">
+      <div class="form-page__inputs">
+        {{> "input/input" label="Почта" name="email" type="text" errortext="Обязательное поле"}}
+        {{> "input/input" label="Логин" name="login" type="text" errortext="Обязательное поле"}}
+        {{> "input/input" label="Имя" name="first_name" type="text" errortext="Обязательное поле"}}
+        {{> "input/input" label="Фамилия" name="second_name" type="text" errortext="Обязательное поле"}}
+        {{> "input/input" label="Телефон" name="phone" type="text" errortext="Введите только цифры"}}
+        {{> "input/input" label="Пароль" name="password" type="password"}}
+        {{> "input/input" label="Пароль (ещё раз)" name="password" type="password" errortext="Пароли не совпадают"}}
+      </div>
+      <div class="form-page__btns">
+        {{> "button/button" text="Зарегистрироваться"}}
+        <a href="signin.hbs" class="form-page__link">Войти</a>
+      </div>
+    </form>
+  </div>
+</div>

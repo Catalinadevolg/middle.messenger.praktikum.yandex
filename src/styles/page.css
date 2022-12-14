@@ -1,0 +1,28 @@
+@font-face {
+	font-family: 'Inter'; 
+	src: url(Inter-VariableFont_slnt,wght.ttf); 
+}
+:root {
+    --btn-blue-color: rgba(51, 105, 243, 1);
+    --btn-hover-color: rgb(77, 123, 237);
+    --link-blue-color: rgba(51, 105, 243, 1);
+    --red-color: rgba(255, 0, 0, 1);
+    --white-color: rgba(255, 255, 255, 1);
+    --main-text-color: #1E1E1E;
+    --light-gray-text-color: #999999;
+    --gray-line-color: #EAEAEA;
+    --light-gray-background-color: #f5f5f5;
+}
+.page {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    text-align: center;
+    color: var(--main-text-color);
+}
+.page__container{
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
