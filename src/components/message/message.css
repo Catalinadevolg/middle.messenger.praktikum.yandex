@@ -1,0 +1,53 @@
+.message__wrapper {
+	position: relative;
+
+	max-width: 50%;
+
+	margin: 5px 0;
+	padding: 11px 11px 26px 11px;
+
+	border-radius: 12px;
+
+	color: var(--main-text-color);
+}
+
+.message__in {
+	align-self: flex-start;
+	justify-content: left;
+	text-align: left;
+
+	background-color: #f8f8f8;
+}
+
+.message__out {
+	align-self: flex-end;
+	justify-content: right;
+	text-align: right;
+
+	margin-left: auto;
+
+	background-color: #e4edfd;
+}
+
+.message__message {
+	font-size: 12px;
+	line-height: 15px;
+}
+
+.message__time {
+	position: absolute;
+
+	right: 11px;
+	bottom: 11px;
+
+	font-size: 9px;
+	line-height: 9px;
+}
+
+.time__in {
+	color: var(--light-gray-text-color);
+}
+
+.time__out {
+	color: var(--link-blue-color);
+}
