@@ -1,83 +1,116 @@
 .chat-list-item {
+    position: relative;
+
     display: flex;
     flex-direction: row;
-    position: relative;
+
     width: 100%;
     margin: 4px 0;
     padding: 10px;
+
     cursor: pointer;
 }
+
 .chat-list-item:hover {
-    background-color: #E4EDFD;
+    background-color: #e4edfd;
 }
+
 .item_active {
-    background-color: #E4EDFD;
+    background-color: #e4edfd;
 }
+
 .chat-list-item::after {
-    display: block;
-    content: "";
     position: absolute;
+    left: 0;
+
+    display: block;
+
     width: 93%;
     height: 1px;
-    left: 0;
-    margin: -12px 10px 0 10px;
+    margin: -12px 10px 0;
+
+    content: "";
+
     background-color: var(--gray-line-color);
 }
+
 .chat-list-item__photo {
+    overflow: hidden;
+
     min-width: 47px;
     max-width: 47px;
     max-height: 47px;
+
     border-radius: 50%;
-    overflow: hidden;
 }
+
 .photo-img {
     max-width: 47px;
     max-height: 47px;
     object-fit: cover;
 }
+
 .chat-list-item__info {
     display: flex;
     flex-direction: column;
-    margin-left: 10px;
+
     margin-right: 50px;
+    margin-left: 10px;
 }
+
 .info-name {
     margin-bottom: 4px;
-    font-weight: 600;
-    font-size: 13px;
-    line-height: 13px;
+
     text-align: left;
+
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 13px;
 }
+
 .info-last-message {
+    overflow: hidden;
+
+    max-height: 30px;
+
+    text-align: left;
+
     font-size: 12px;
     line-height: 15px;
-    max-height: 30px;
-    overflow: hidden;
-    text-align: left;
 }
+
 .last-message {
     color: var(--light-gray-text-color);
 }
+
 .chat-list-item__data {
     margin-left: auto;
+
     color: var(--light-gray-text-color);
 }
+
 .data-date {
     position: absolute;
     right: 10px;
+
     text-align: right;
+
     font-size: 9px;
     line-height: 13px;
 }
+
 .data-count {
     position: absolute;
-    width: 15px;
-    height: 15px;
     right: 10px;
     bottom: 10px;
+
+    width: 15px;
+    height: 15px;
+
+    color: var(--white-color);
+    border-radius: 50%;
+    background-color: var(--btn-blue-color);
+
     font-size: 9px;
     line-height: 15px;
-    border-radius: 50%;
-    color: var(--white-color);
-    background-color: var(--btn-blue-color);
 }
