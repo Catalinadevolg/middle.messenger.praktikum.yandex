@@ -1,3 +1,7 @@
+.chat-box_active {
+	flex-grow: 1;
+}
+
 .chat-box__container {
 	position: relative;
 
@@ -111,6 +115,17 @@
 
 .chat-box__main {
 	flex-grow: 1;
+	justify-content: end;
+
+	position: relative;
+
+	overflow: hidden;
+	overflow-y: auto;
+
+	padding: 30px 20px;
+
+	/*display: flex;
+	flex-direction: column;*/
 }
 
 .chat-box__empty {
@@ -120,6 +135,15 @@
 
 	font-size: 12px;
 	line-height: 12px;
+}
+
+.chat-box__date {
+	margin-bottom: 25px;
+
+	font-size: 12px;
+	line-height: 12px;
+
+	color: #999999;
 }
 
 .chat-box__footer {

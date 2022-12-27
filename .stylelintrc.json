@@ -1,14 +1,6 @@
 {
-	"extends": [
-		"stylelint-config-standard",
-		"stylelint-config-prettier",
-		"stylelint-order-config-standard"
-	],
-	"plugins": ["stylelint-order"],
+	"extends": ["stylelint-config-prettier"],
 	"rules": {
-		"selector-class-pattern": null,
-		"color-hex-case": "lower",
-		"block-no-empty": true
-	},
-	"ignoreFiles": ["dist/*"]
+		"selector-class-pattern": null
+	}
 }
