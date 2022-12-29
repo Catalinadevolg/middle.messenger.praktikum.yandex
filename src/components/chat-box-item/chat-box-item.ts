@@ -4,7 +4,7 @@ interface ChatBoxItemProps {
 	userAvatar: string;
 	userName: string;
 }
-export class ChatBoxItem extends Block {
+export class ChatBoxItem extends Block<ChatBoxItemProps> {
 	static componentName = 'ChatBoxItem';
 
 	constructor({ ...props }: ChatBoxItemProps) {
@@ -43,7 +43,7 @@ export class ChatBoxItem extends Block {
 				},
 			],
 			activeChat: 1,
-			onSubmit: () => {
+			onClick: () => {
 				const formData: any = {};
 
 				const inputEl = this.refs.inputRef.getContent() as HTMLInputElement;
@@ -97,7 +97,7 @@ export class ChatBoxItem extends Block {
 								}}}
 								{{{Button
 									buttonClass="chat-box__btn"
-									onSubmit=onSubmit
+									onClick=onClick
 								}}}
 							</form>
 					</div>

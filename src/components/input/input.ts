@@ -8,7 +8,7 @@ interface InputProps {
 	onFocus?: () => void;
 	onBlur?: () => void;
 }
-export class Input extends Block {
+export class Input extends Block<InputProps> {
 	static componentName = 'Input';
 
 	constructor({ onInput, onFocus, onBlur, ...props }: InputProps) {

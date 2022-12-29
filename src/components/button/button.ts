@@ -2,13 +2,13 @@ import Block from 'core/Block';
 
 interface ButtonProps {
 	text: string;
-	onSubmit?: () => void;
+	onClick?: () => void;
 }
 export class Button extends Block<ButtonProps> {
 	static componentName = 'Button';
 
-	constructor({ onSubmit, ...props }: ButtonProps) {
-		super({ ...props, events: { click: onSubmit } });
+	constructor({ onClick, ...props }: ButtonProps) {
+		super({ ...props, events: { click: onClick } });
 	}
 
 	render() {

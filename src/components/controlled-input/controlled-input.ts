@@ -10,7 +10,7 @@ interface ControlledInputProps {
 	onBlur?: () => void;
 	onFocus?: () => void;
 }
-export class ControlledInput extends Block {
+export class ControlledInput extends Block<ControlledInputProps> {
 	static componentName = 'ControlledInput';
 
 	constructor({ ...props }: ControlledInputProps) {

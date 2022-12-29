@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid';
 import Handlebars from 'handlebars';
 
 // @ts-ignore
-class Block<P = any> {
+class Block<P extends Record<string, any>> {
 	static EVENTS = {
 		INIT: 'init',
 		FLOW_CDM: 'flow:component-did-mount',
@@ -14,14 +14,14 @@ class Block<P = any> {
 	public id = nanoid(6);
 	protected _element: Nullable<HTMLElement> = null;
 	// @ts-ignore
-	private _meta: { props: any };
+	private _meta: { props: P };
 
-	protected props: any;
-	protected children: Record<string, Block>;
+	protected props: P;
+	protected children: Record<string, Block<P>>;
 	private eventBus: () => EventBus;
 
 	protected state: any = {};
-	protected refs: { [key: string]: Block } = {};
+	protected refs: { [key: string]: Block<P> } = {};
 
 	/** JSDoc
 	 * @param {string} tagName
@@ -29,7 +29,7 @@ class Block<P = any> {
 	 *
 	 * @returns {void}
 	 */
-	constructor(propsAndChildren: any = {}) {
+	constructor(propsAndChildren: P = {} as P) {
 		const eventBus = new EventBus();
 
 		const { props, children } = this.getPropsAndChildren(propsAndChildren);
@@ -53,14 +53,12 @@ class Block<P = any> {
 		eventBus.emit(Block.EVENTS.INIT);
 	}
 
-	getPropsAndChildren(propsAndChildren: any) {
-		const children: any = {};
-		const props: any = {};
+	getPropsAndChildren(propsAndChildren: P) {
+		const children: Record<Keys<P>, Block<P>> = {} as Record<Keys<P>, Block<P>>;
+		const props: P = {} as P;
 
-		Object.entries(propsAndChildren).map(([key, value]) => {
+		(Object.entries(propsAndChildren) as Array<[Keys<P>, any]>).forEach(([key, value]) => {
 			if (value instanceof Block) {
-				children[key] = value;
-			} else if (Array.isArray(value) && value.every((v) => v instanceof Block)) {
 				children[key] = value;
 			} else {
 				props[key] = value;
@@ -83,7 +81,7 @@ class Block<P = any> {
 		this._element = this._createDocumentElement('div');
 	}
 
-	protected getStateFromProps(_props: any): void {
+	protected getStateFromProps(_props: P): void {
 		this.state = {};
 	}
 
@@ -115,7 +113,7 @@ class Block<P = any> {
 		return true;
 	}
 
-	setProps = (nextProps: any) => {
+	setProps = (nextProps: P) => {
 		if (!nextProps) {
 			return;
 		}
@@ -170,7 +168,7 @@ class Block<P = any> {
 		return this.element!;
 	}
 
-	_makePropsProxy(props: any) {
+	_makePropsProxy(props: P): any {
 		// Можно и так передать this
 		// Такой способ больше не применяется с приходом ES6+
 		const self = this;

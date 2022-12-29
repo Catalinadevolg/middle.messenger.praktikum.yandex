@@ -8,7 +8,7 @@ interface ChatListItemProps {
 	lastMessageDate: Date;
 	newMessagesCount?: number;
 }
-export class ChatListItem extends Block {
+export class ChatListItem extends Block<ChatListItemProps> {
 	static componentName = 'ChatListItem';
 
 	constructor({ ...props }: ChatListItemProps) {

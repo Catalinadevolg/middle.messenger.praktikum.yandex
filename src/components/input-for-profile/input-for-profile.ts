@@ -11,7 +11,7 @@ interface InputForProfileProps {
 	onFocus?: () => void;
 	onBlur?: () => void;
 }
-export class InputForProfile extends Block {
+export class InputForProfile extends Block<InputForProfileProps> {
 	static componentName = 'InputForProfile';
 
 	constructor({ onInput, onFocus, onBlur, ...props }: InputForProfileProps) {

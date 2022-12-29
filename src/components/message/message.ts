@@ -5,7 +5,7 @@ interface MessageProps {
 	message: string;
 	time: Date;
 }
-export class Message extends Block {
+export class Message extends Block<MessageProps> {
 	static componentName = 'Message';
 
 	constructor({ ...props }: MessageProps) {

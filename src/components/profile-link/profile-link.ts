@@ -6,7 +6,7 @@ interface ProfileLinkProps {
 	text: string;
 	onClick: () => void;
 }
-export class ProfileLink extends Block {
+export class ProfileLink extends Block<ProfileLinkProps> {
 	static componentName = 'ProfileLink';
 
 	constructor({ onClick, ...props }: ProfileLinkProps) {

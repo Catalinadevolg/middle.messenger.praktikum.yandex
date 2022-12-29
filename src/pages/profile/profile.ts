@@ -36,7 +36,7 @@ export default class ProfilePage extends Block {
 				<a href="messenger.html" class="profile__back-btn">
 						<div class="back-btn"></div>
 				</a>
-				<div class="profile">
+				<main class="profile">
 						{{{Avatar
 							userAvatar=userInfo.userAvatar
 							className="profile__avatar"
@@ -122,7 +122,7 @@ export default class ProfilePage extends Block {
 							className="red-link"
 							text="Выйти"
 						}}}
-				</div>
+				</main>
 			</div>
 		`;
 	}

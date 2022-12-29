@@ -17,7 +17,7 @@ export default class ProfilePage extends Block {
 		});
 
 		this.setProps({
-			onSubmit: () => {
+			onClick: () => {
 				const formData: any = {};
 
 				Object.values(this.refs).forEach((ref: any) => {
@@ -43,7 +43,7 @@ export default class ProfilePage extends Block {
 				<a href="messenger.html" class="profile__back-btn">
 						<div class="back-btn"></div>
 				</a>
-				<div class="profile">
+				<main class="profile">
 						{{{Avatar
 							userAvatar="${defaultAvatar}"
 							className="profile__avatar"
@@ -118,9 +118,9 @@ export default class ProfilePage extends Block {
 							buttonClass="button-wrapper"
 							textClass="button"
 							text="Сохранить"
-							onSubmit=onSubmit
+							onClick=onClick
 						}}}
-				</div>
+				</main>
 			</div>
 		`;
 	}

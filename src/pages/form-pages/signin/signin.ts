@@ -6,7 +6,7 @@ export default class SigninPage extends Block {
 		super();
 
 		this.setProps({
-			onSubmit: () => {
+			onClick: () => {
 				const formData: any = {};
 
 				Object.values(this.refs).forEach((ref: any) => {
@@ -28,7 +28,7 @@ export default class SigninPage extends Block {
 
 	render() {
 		return `
-			<div class='form-page signin'>
+			<main class='form-page signin'>
 				<div class='form-page__container'>
 					<h1 class='form-page__title'>Вход</h1>
 					<form class='form-page__form'>
@@ -53,13 +53,13 @@ export default class SigninPage extends Block {
 								buttonClass="button-wrapper"
 								textClass="button"
 								text='Авторизоваться'
-								onSubmit=onSubmit
+								onClick=onClick
 							}}}
 							<a href='signup.html' class='form-page__link'>Нет аккаунта?</a>
 						</div>
 					</form>
 				</div>
-			</div>
+			</main>
 		`;
 	}
 }

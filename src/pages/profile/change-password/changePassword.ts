@@ -16,7 +16,7 @@ export default class ChangePasswordPage extends Block {
 		console.log(this.refs);
 
 		this.setProps({
-			onSubmit: () => {
+			onClick: () => {
 				const formData: any = {};
 
 				Object.values(this.refs).forEach((ref: any) => {
@@ -42,7 +42,7 @@ export default class ChangePasswordPage extends Block {
 				<a href="messenger.html" class="profile__back-btn">
 						<div class="back-btn"></div>
 				</a>
-				<div class="profile">
+				<main class="profile">
 						{{{Avatar userAvatar="${defaultAvatar}" className="profile__avatar" textClassName="avatar__text"}}}
 						<p class="profile__name">Иван</p>
 						<div class="profile__info">
@@ -91,10 +91,10 @@ export default class ChangePasswordPage extends Block {
 								buttonClass="button-wrapper"
 								textClass="button"
 								text="Сохранить"
-								onSubmit=onSubmit
+								onClick=onClick
 							}}}
 						</div>
-				</div>
+				</main>
 			</div>
 		`;
 	}

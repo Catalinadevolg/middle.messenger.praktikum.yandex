@@ -78,7 +78,7 @@ export default class MessengerPage extends Block {
 
 	render() {
 		return `
-			<div class="messenger">
+			<main class="messenger">
 				<div class="chat-list">
 					<div class="chat-list__header">
 						<div class="chat-list__profile-link">
@@ -121,7 +121,7 @@ export default class MessengerPage extends Block {
 				{{else}}
 					{{{ ChatPlug }}}
 				{{/if}}
-			</div>
+			</main>
 		`;
 	}
 }
