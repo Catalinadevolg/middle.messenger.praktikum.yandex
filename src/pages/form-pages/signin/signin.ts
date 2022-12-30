@@ -1,7 +1,8 @@
 import Block from 'core/Block';
 import { validateForm } from 'helpers/validateForm';
 
-export default class SigninPage extends Block {
+interface SigninPageProps {}
+export default class SigninPage extends Block<SigninPageProps> {
 	constructor() {
 		super();
 
@@ -52,6 +53,7 @@ export default class SigninPage extends Block {
 							{{{Button
 								buttonClass="button-wrapper"
 								textClass="button"
+								type="submit"
 								text='Авторизоваться'
 								onClick=onClick
 							}}}

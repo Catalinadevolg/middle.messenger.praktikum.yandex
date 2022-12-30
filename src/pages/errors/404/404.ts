@@ -1,6 +1,7 @@
 import Block from 'core/Block';
 
-export default class Error404 extends Block {
+interface Error404Props {}
+export default class Error404 extends Block<Error404Props> {
 	render() {
 		return `
 		<main class="error-page">

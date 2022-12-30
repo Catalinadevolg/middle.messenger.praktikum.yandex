@@ -2,7 +2,8 @@ import Block from 'core/Block';
 
 import defaultAvatar from 'assets/empty-avatar.png';
 
-export default class ProfilePage extends Block {
+interface ProfilePageProps {}
+export default class ProfilePage extends Block<ProfilePageProps> {
 	constructor() {
 		super();
 
@@ -15,17 +16,6 @@ export default class ProfilePage extends Block {
 				second_name: 'Иванов',
 				display_name: 'Иван',
 				phone: '+79991234567',
-			},
-			ChangeInfo: () => {
-				const allInputs = this.refs;
-				Object.values(allInputs).forEach((input) => {
-					//@ts-ignore
-					const arrProps = [input.props];
-					for (let i = 0; i < arrProps.length; i++) {
-						arrProps[i].disabled = false;
-						arrProps[i].activeClass = 'active-input';
-					}
-				});
 			},
 		});
 	}

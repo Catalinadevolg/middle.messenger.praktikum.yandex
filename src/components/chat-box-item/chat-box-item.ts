@@ -97,6 +97,7 @@ export class ChatBoxItem extends Block<ChatBoxItemProps> {
 								}}}
 								{{{Button
 									buttonClass="chat-box__btn"
+									type="submit"
 									onClick=onClick
 								}}}
 							</form>

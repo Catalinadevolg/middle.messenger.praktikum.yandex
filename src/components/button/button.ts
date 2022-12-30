@@ -1,7 +1,10 @@
 import Block from 'core/Block';
 
 interface ButtonProps {
+	buttonClass?: string;
+	textClass?: string;
 	text: string;
+	type?: 'submit' | 'button';
 	onClick?: () => void;
 }
 export class Button extends Block<ButtonProps> {
@@ -13,7 +16,7 @@ export class Button extends Block<ButtonProps> {
 
 	render() {
 		return `
-		<button class="{{buttonClass}}" type="button">
+		<button class="{{buttonClass}}" type={{type}}>
 			<div class="{{textClass}}">{{text}}</div>
 		</button>
 		`;

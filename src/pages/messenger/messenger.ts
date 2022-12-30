@@ -2,7 +2,9 @@ import Block from 'core/Block';
 
 import defaultAvatar from 'assets/empty-avatar.png';
 
-export default class MessengerPage extends Block {
+interface MessengerPageProps {}
+
+export default class MessengerPage extends Block<MessengerPageProps> {
 	constructor() {
 		super();
 

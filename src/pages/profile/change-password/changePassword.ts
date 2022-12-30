@@ -3,7 +3,9 @@ import { validateForm } from 'helpers/validateForm';
 
 import defaultAvatar from 'assets/empty-avatar.png';
 
-export default class ChangePasswordPage extends Block {
+interface ChangePasswordPageProps {}
+
+export default class ChangePasswordPage extends Block<ChangePasswordPageProps> {
 	constructor() {
 		super();
 
@@ -90,6 +92,7 @@ export default class ChangePasswordPage extends Block {
 							{{{Button
 								buttonClass="button-wrapper"
 								textClass="button"
+								type="submit"
 								text="Сохранить"
 								onClick=onClick
 							}}}

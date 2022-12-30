@@ -3,7 +3,9 @@ import { validateForm } from 'helpers/validateForm';
 
 import defaultAvatar from 'assets/empty-avatar.png';
 
-export default class ProfilePage extends Block {
+interface ProfilePageProps {}
+
+export default class ProfilePage extends Block<ProfilePageProps> {
 	constructor() {
 		super({
 			userInfo: {
@@ -117,6 +119,7 @@ export default class ProfilePage extends Block {
 						{{{Button
 							buttonClass="button-wrapper"
 							textClass="button"
+							type="submit"
 							text="Сохранить"
 							onClick=onClick
 						}}}

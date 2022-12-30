@@ -8,7 +8,8 @@ import ProfilePage from './profile/profile';
 import Error404 from './errors/404/404';
 import Error500 from './errors/500/500';
 
-export default class OnBoarding extends Block {
+interface OnBoardingProps {}
+export default class OnBoarding extends Block<OnBoardingProps> {
 	constructor() {
 		super();
 		this.setProps({
@@ -40,50 +41,52 @@ export default class OnBoarding extends Block {
 	}
 	render() {
 		return `
-			<ul style="text-align: left; margin-left: 10px; margin-top: 10px;">
-				<li style="margin-bottom: 5px; list-style: square inside;">
-				  {{{Link
-						link="signin.html"
-						text="Sign in"
-						onClick=toSignin
+			<nav>
+				<ul style="text-align: left; margin-left: 10px; margin-top: 10px;">
+					<li style="margin-bottom: 5px; list-style: square inside;">
+						{{{Link
+							link="signin.html"
+							text="Sign in"
+							onClick=toSignin
+						}}}
+					</li>
+					<li style="margin-bottom: 5px; list-style: square inside;">
+					{{{Link
+						link="signup.html"
+						text="Sign up"
+						onClick=toSignup
 					}}}
-				</li>
-				<li style="margin-bottom: 5px; list-style: square inside;">
-				{{{Link
-					link="signup.html"
-					text="Sign up"
-					onClick=toSignup
-				}}}
-				</li>
-				<li style="margin-bottom: 5px; list-style: square inside;">
-				{{{Link
-					link="messenger.html"
-					text="Messenger"
-					onClick=toMessenger
-				}}}
-				</li>
-				<li style="margin-bottom: 5px; list-style: square inside;">
-				{{{Link
-					link="profile.html"
-					text="Profile"
-					onClick=toProfile
-				}}}
-				</li>
-				<li style="margin-bottom: 5px; list-style: square inside;">
-				{{{Link
-					link="404.html"
-					text="Error 404"
-					onClick=toError404
-				}}}
-				</li>
-				<li style="margin-bottom: 5px; list-style: square inside;">
-				{{{Link
-					link="500.html"
-					text="Error 500"
-					onClick=toError500
-				}}}
-				</li>
-			</ul>
+					</li>
+					<li style="margin-bottom: 5px; list-style: square inside;">
+					{{{Link
+						link="messenger.html"
+						text="Messenger"
+						onClick=toMessenger
+					}}}
+					</li>
+					<li style="margin-bottom: 5px; list-style: square inside;">
+					{{{Link
+						link="profile.html"
+						text="Profile"
+						onClick=toProfile
+					}}}
+					</li>
+					<li style="margin-bottom: 5px; list-style: square inside;">
+					{{{Link
+						link="404.html"
+						text="Error 404"
+						onClick=toError404
+					}}}
+					</li>
+					<li style="margin-bottom: 5px; list-style: square inside;">
+					{{{Link
+						link="500.html"
+						text="Error 500"
+						onClick=toError500
+					}}}
+					</li>
+				</ul>
+			</nav>
 		`;
 	}
 }
