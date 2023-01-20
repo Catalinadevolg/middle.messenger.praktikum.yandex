@@ -1,19 +1,22 @@
-import Block from 'core/Block';
-import { validateForm } from 'helpers/validateForm';
+import { Block, BlockProps } from 'core';
+import { validateForm } from 'utils/validateForm';
 
-interface ControlledInputProps {
+type ControlledInputProps = BlockProps & {
 	label: string;
 	type?: 'text' | 'password';
 	name: string;
 	placeholder: string;
-	onInput?: () => void;
-	onBlur?: () => void;
-	onFocus?: () => void;
-}
+	inputClassName: string;
+	controlledInputClassName: string;
+	addControlledInputClass?: string;
+	onInput?: (e: FocusEvent) => void;
+	onBlur?: (e: FocusEvent) => void;
+	onFocus?: (e: FocusEvent) => void;
+};
 export class ControlledInput extends Block<ControlledInputProps> {
 	static componentName = 'ControlledInput';
 
-	constructor({ ...props }: ControlledInputProps) {
+	constructor(props: ControlledInputProps) {
 		super({ ...props });
 
 		this.setProps({
@@ -57,14 +60,14 @@ export class ControlledInput extends Block<ControlledInputProps> {
 
 	render(): string {
 		return `
-		<div class="controlled-input">
+		<div class="{{controlledInputClassName}} {{addControlledInputClass}}">
 			<label for="login" class="input__label">{{label}}</label>
 			{{{Input
 				ref="inputRef"
 				type="{{type}}"
 				name="{{name}}"
 				placeholder="{{placeholder}}"
-				className="input__input"
+				inputClassName="{{inputClassName}}"
 				onInput=onInput
 				onFocus=onFocus
 				onBlur=onBlur

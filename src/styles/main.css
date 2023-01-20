@@ -1,10 +1,12 @@
 @import url('./reset.css');
 @import url('./page.css');
+@import url('../components/avatar/avatar.css');
 @import url('../components/chat-box-item/chat-box-item.css');
 @import url('../components/chat-list-item/chat-list-item.css');
 @import url('../components/chat-plug/chat-plug.css');
 @import url('../components/controlled-input/controlled-input.css');
 @import url('../components/message/message.css');
+@import url('../components/messenger-settings/messenger-settings.css');
 @import url('../components/profile-line/profile-line.css');
 @import url('../pages/errors/errors.css');
 @import url('../pages/form-pages/form-pages.css');

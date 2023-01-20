@@ -1,11 +1,9 @@
-import Block from 'core/Block';
-import { validateForm } from 'helpers/validateForm';
+import { Block } from 'core';
+import { validateForm } from 'utils/validateForm';
 
 import defaultAvatar from 'assets/empty-avatar.png';
 
-interface ProfilePageProps {}
-
-export default class ProfilePage extends Block<ProfilePageProps> {
+export class ChangeInfoPage extends Block {
 	constructor() {
 		super({
 			userInfo: {

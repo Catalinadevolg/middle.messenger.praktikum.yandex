@@ -1,62 +1,61 @@
-import Block from 'core/Block';
+import { Block, BlockProps, Store } from 'core';
+import Socket from 'services/socket';
+import { withStore } from 'utils';
 
-interface ChatBoxItemProps {
+type ChatBoxItemProps = BlockProps & {
+	store: Store<AppState>;
 	userAvatar: string;
 	userName: string;
-}
-export class ChatBoxItem extends Block<ChatBoxItemProps> {
+	sendMessage: (e: SubmitEvent) => void;
+	openSettings: () => void;
+	activeModal: string;
+};
+class ChatBoxItem extends Block<ChatBoxItemProps> {
 	static componentName = 'ChatBoxItem';
 
 	constructor({ ...props }: ChatBoxItemProps) {
 		super({ ...props });
 
 		this.setProps({
-			listMessages: [
-				{
-					message:
-						'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi repellat est quos dolor sunt eius eveniet eaque nemo illo ad cumque iure reiciendis, velit totam, optio inventore sint ipsum magnam.',
-					direction: 'in',
-					time: new Date().toLocaleTimeString(),
-				},
-				{
-					message:
-						'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi repellat est quos dolor sunt eius eveniet eaque nemo illo ad cumque iure reiciendis, velit totam, optio inventore sint ipsum magnam.',
-					direction: 'out',
-					time: new Date().toLocaleTimeString(),
-				},
-				{
-					message: 'Здесь какой-то текст',
-					direction: 'out',
-					time: new Date().toLocaleTimeString(),
-				},
-				{
-					message:
-						'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi repellat est quos dolor sunt eius eveniet eaque nemo illo ad cumque iure reiciendis, velit totam, optio inventore sint ipsum magnam.',
-					direction: 'in',
-					time: new Date().toLocaleTimeString(),
-				},
-				{
-					message:
-						'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi repellat est quos dolor sunt eius eveniet eaque nemo illo ad cumque iure reiciendis, velit totam, optio inventore sint ipsum magnam. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi repellat est quos dolor sunt eius eveniet eaque nemo illo ad cumque iure reiciendis, velit totam, optio inventore sint ipsum magnam.',
-					direction: 'in',
-					time: new Date().toLocaleTimeString(),
-				},
-			],
+			activeModal: '',
+			openSettings: () => this.openSettings(),
 			activeChat: 1,
-			onClick: () => {
-				const formData: any = {};
-
-				const inputEl = this.refs.inputRef.getContent() as HTMLInputElement;
-
-				if (inputEl.value) {
-					formData[inputEl.name] = inputEl.value;
-					console.log(formData);
-				}
-			},
+			sendMessage: (e: SubmitEvent) => this.sendMessage(e),
 		});
 	}
 
+	openSettings() {
+		// @ts-ignore
+		const props = this.refs.bubbleMessenger.props;
+		if (!props.activeBubble) {
+			props.activeBubble = 'chat-menu__modal_active';
+		} else {
+			props.activeBubble = '';
+		}
+		// @ts-ignore
+		console.log(this.refs.bubbleMessenger.props);
+	}
+
+	// TODO:
+	// Добавить async сюда или к sendMessage in Socket?
+	// Обновлять lastMesaage в chatListItem после отправки сообщения
+	// Стилизовать buble-rows при наведении
+	sendMessage(e: SubmitEvent) {
+		e.preventDefault();
+
+		const inputComponent: any = this.refs.inputRef;
+		const inputEl = inputComponent.refs.inputRef.getContent() as HTMLInputElement;
+
+		if (inputEl.value) {
+			Socket.sendMessage(inputEl.value);
+		}
+	}
+
 	render() {
+		const state = this.props.store.getState();
+		const messages = state.messages;
+		// console.log('Перерендер ЧатБокса');
+
 		return `
 			<div class="chat-box_active">
 				<div class="chat-box__container">
@@ -67,43 +66,55 @@ export class ChatBoxItem extends Block<ChatBoxItemProps> {
 									</div>
 									<p class="user-info__name">{{userName}}</p>
 							</div>
-							<button class="chat-box__settings-btn">
-									<div class="settings-btn">
-											<div class="btn-point"></div>
-											<div class="btn-point btn-point_middle"></div>
-											<div class="btn-point"></div>
-									</div>
-							</button>
+							{{{MessengerSettings
+								ref="messengerSettings"
+								activeModalClass=""
+								onClick=openSettings
+							}}}
 					</div>
 					<div class="chat-box__main">
-							<!--<p class="chat-box__empty">Здесь ещё нет сообщений.</p>-->
-							<div class="chat-box__date"><time>23 декабря</time></div>
-							{{#each listMessages}}
-								{{{Message
-									message=this.message
-									direction=this.direction
-									time=this.time
-								}}}
-							{{/each}}
+							<div class="chat-box__date"><time>Вывести дату!</time></div>
+								${
+									messages && messages.length > 0
+										? messages
+												.map((message: ChatMessage) => {
+													return `
+														{{{Message
+															message="${message.content}"
+															direction="${message.userId === state.user?.id ? 'out' : 'in'}"
+															time="${message.time}"
+														}}}`;
+												})
+												.join('')
+										: '<p class="chat-box__empty">Здесь ещё нет сообщений.</p>'
+								}
 					</div>
 					<div class="chat-box__footer">
 							<form class="chat-box__form">
-								{{{Input
+								{{{ControlledInput
 									ref="inputRef"
 									type="text"
 									name="message"
 									placeholder="Сообщение"
-									className="chat-box__input"
+									controlledInputClassName="chat-box__controlled-input"
+									inputClassName="chat-box__input"
 								}}}
 								{{{Button
 									buttonClass="chat-box__btn"
 									type="submit"
-									onClick=onClick
+									onClick=sendMessage
 								}}}
 							</form>
 					</div>
 				</div>
+				{{{BubbleMessenger
+					ref="bubbleMessenger"
+				}}}
 			</div>
 		`;
 	}
 }
+
+const ComposedChatBoxItem = withStore(ChatBoxItem);
+
+export { ComposedChatBoxItem as ChatBoxItem };

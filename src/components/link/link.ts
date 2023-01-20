@@ -1,10 +1,10 @@
-import Block from 'core/Block';
+import { Block, BlockProps } from 'core';
 
-interface LinkProps {
-	link: string;
+type LinkProps = BlockProps & {
+	linkClass?: string;
 	text: string;
-	onClick: () => void;
-}
+	onClick?: () => void;
+};
 export class Link extends Block<LinkProps> {
 	static componentName = 'Link';
 
@@ -14,7 +14,9 @@ export class Link extends Block<LinkProps> {
 
 	render() {
 		return `
-			<a href="{{link}}">{{text}}</a>
+		<button class="{{linkClass}}" type="button">
+			{{text}}
+		</button>
 		`;
 	}
 }

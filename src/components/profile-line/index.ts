@@ -1,1 +1,1 @@
-export { ProfileLine as default } from './profile-line';
+export { ProfileLine } from './profile-line';

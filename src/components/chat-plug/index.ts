@@ -1,1 +1,1 @@
-export { ChatPlug as default } from './chat-plug';
+export { ChatPlug } from './chat-plug';

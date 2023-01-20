@@ -1,8 +1,6 @@
-import Block from 'core/Block';
+import { Block } from 'core';
 
-interface Error500Props {}
-
-export default class Error500 extends Block<Error500Props> {
+export class Error500Page extends Block {
 	render() {
 		return `
 		<main class="error-page">

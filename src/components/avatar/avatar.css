@@ -1,0 +1,137 @@
+.profile__avatar {
+	position: relative;
+	overflow: hidden;
+
+	max-width: 130px;
+	max-height: 130px;
+	margin: 0 auto;
+
+	border-radius: 50%;
+}
+
+.avatar__label {
+	max-width: 130px;
+	max-height: 130px;
+	cursor: pointer;
+}
+
+.hidden-input {
+	display: none;
+}
+
+.profile__avatar img {
+	max-height: 100%;
+	max-width: 100%;
+	min-width: 130px;
+	min-height: 130px;
+	object-fit: cover;
+}
+
+.avatar__text {
+	height: 100%;
+	width: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+
+	font-size: 13px;
+	line-height: 130px;
+
+	color: #ffffff;
+	background: rgba(0, 0, 0, 0.5);
+
+	visibility: hidden;
+	opacity: 0;
+
+	transition: opacity 0.2s, visibility 0.2s;
+}
+
+.profile__avatar:hover .avatar__text {
+	visibility: visible;
+	opacity: 1;
+}
+
+.avatar__modal {
+	position: fixed;
+	z-index: 12;
+	top: 0;
+	right: 0;
+	left: 0;
+
+	visibility: hidden;
+
+	height: 100vh;
+
+	opacity: 0;
+	background-color: #1e1e1e80;
+}
+
+.avatar__modal_active {
+	visibility: visible;
+
+	opacity: 1;
+}
+
+.avatar__box {
+	position: absolute;
+	margin: auto;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	left: 0;
+
+	display: flex;
+
+	width: 500px;
+	height: 500px;
+
+	border-radius: 12px;
+	background: var(--white-color);
+	box-shadow: 0 0 6px rgb(0 0 0 / 14%);
+}
+
+.avatar__box-container {
+	margin: auto;
+}
+
+.avatar__img-box {
+	display: flex;
+
+	width: 400px;
+	height: 400px;
+
+	margin-bottom: 10px;
+}
+
+.avatar__img-box img {
+	margin: auto;
+
+	max-height: 100%;
+	max-width: 100%;
+	min-width: 400px;
+	min-height: 400px;
+	object-fit: cover;
+
+	border-radius: 50%;
+}
+
+.avatar__buttons-box {
+	display: flex;
+	flex-direction: column;
+}
+
+.avatar-link {
+	margin: auto;
+	margin-top: 14px;
+
+	color: var(--link-blue-color);
+
+	font-size: 11px;
+	line-height: 11px;
+
+	background: none;
+}
+
+.avatar-link:hover {
+	text-decoration-line: underline;
+}

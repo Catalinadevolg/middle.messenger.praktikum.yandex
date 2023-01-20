@@ -1,1 +1,1 @@
-export { Link as default } from './link';
+export { LinkForOnboarding } from './link-for-onboarding';

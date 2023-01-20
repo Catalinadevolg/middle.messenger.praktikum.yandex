@@ -1,1 +1,1 @@
-export { ChatBoxItem as default } from './chat-box-item';
+export { ChatBoxItem } from './chat-box-item';

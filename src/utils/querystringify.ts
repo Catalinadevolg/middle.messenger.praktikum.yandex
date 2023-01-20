@@ -1,7 +1,5 @@
-export default function queryStringify(data: any) {
-	if (typeof data !== 'object') {
-		throw new Error('Data must be object');
-	}
+export function queryStringify(data: any) {
+	if (!data) return '';
 
 	const keys = Object.keys(data);
 	return keys.reduce((result, key, index) => {

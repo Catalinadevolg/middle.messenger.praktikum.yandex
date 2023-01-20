@@ -1,13 +1,19 @@
-import Block from 'core/Block';
-import { validateForm } from 'helpers/validateForm';
+import { Block, CoreRouter, Store } from 'core';
+import { changePassword } from 'services';
+import { validateForm, withRouter, withStore } from 'utils';
 
-import defaultAvatar from 'assets/empty-avatar.png';
+type ChangePasswordPageProps = {
+	router: CoreRouter;
+	store: Store<AppState>;
+	toChats: () => void;
+	savePassword?: () => void;
+	cancelChangePassword?: () => void;
+	formError?: () => void;
+};
 
-interface ChangePasswordPageProps {}
-
-export default class ChangePasswordPage extends Block<ChangePasswordPageProps> {
-	constructor() {
-		super();
+class ChangePasswordPage extends Block<ChangePasswordPageProps> {
+	constructor(props: ChangePasswordPageProps) {
+		super(props);
 
 		Object.values(this.refs).forEach((ref: any) => {
 			ref.refs.inputRef.setProps({
@@ -15,90 +21,149 @@ export default class ChangePasswordPage extends Block<ChangePasswordPageProps> {
 			});
 		});
 
-		console.log(this.refs);
-
 		this.setProps({
-			onClick: () => {
-				const formData: any = {};
-
-				Object.values(this.refs).forEach((ref: any) => {
-					const inputEl = ref.refs.inputRef.getContent() as HTMLInputElement;
-
-					formData[inputEl.name] = inputEl.value;
-
-					const errorText = validateForm(inputEl.name, inputEl.value);
-
-					ref.refs.errorRef.setProps({
-						errorText: errorText,
-					});
-				});
-
-				console.log(formData);
-			},
+			toChats: () => this.toChats(),
+			savePassword: () => this.savePassword(),
+			cancelChangePassword: () => this.cancelChangePassword(),
+			formError: () => this.displayError(),
 		});
 	}
 
+	toChats() {
+		this.props.router.go('/messenger');
+	}
+
+	savePassword() {
+		const formData: any = {};
+		let errors = false;
+
+		Object.values(this.refs).forEach((ref: any) => {
+			const inputEl = ref.refs.inputRef.getContent() as HTMLInputElement;
+
+			let errorText = validateForm(inputEl.name, inputEl.value);
+
+			if (inputEl.name !== 'confirmedPassword') {
+				formData[inputEl.name] = inputEl.value;
+			} else {
+				inputEl.value === formData['newPassword']
+					? (errorText = '')
+					: (errorText = 'Пароли не совпадают');
+			}
+
+			if (errors === false && errorText) {
+				errors = true;
+			}
+
+			ref.refs.errorRef.setProps({
+				errorText: errorText,
+			});
+		});
+
+		if (errors === false && formData) {
+			this.props.store.dispatch(changePassword, formData);
+			console.log(this.props.store.getState().loginFormError);
+			// this.props.router.go('/profile');
+		}
+	}
+
+	displayError() {
+		const error = this.props.store.getState().loginFormError;
+		if (error === 'Password is incorrect') {
+			return 'Старый пароль введён некорректно';
+		}
+
+		return error;
+	}
+
+	cancelChangePassword() {
+		this.props.router.go('/profile');
+	}
+
 	render() {
+		const user = this.props.store.getState().user;
+
 		return `
 			<div class="profile__container">
-				<a href="messenger.html" class="profile__back-btn">
-						<div class="back-btn"></div>
-				</a>
+				<div class="profile__back-btn">
+					{{{Button
+						buttonClass="back-btn"
+						type="button"
+						onClick=toChats
+					}}}
+				</div>
 				<main class="profile">
-						{{{Avatar userAvatar="${defaultAvatar}" className="profile__avatar" textClassName="avatar__text"}}}
-						<p class="profile__name">Иван</p>
-						<div class="profile__info">
-								<div class="profile__info-conainer">
-									{{{ProfileLine
-										label="Старый пароль"
-										name="oldPassword"
-										type="password"
-										placeholder="Введите старый пароль"
-										disabled=false
-										activeClass=""
-										ref="oldPassword"
-										onInput=onInput
-										onBlur=onBlur
-										onFocus=onFocus
-										value=""
-									}}}
-									{{{ProfileLine
-										label="Новый пароль"
-										name="newPassword"
-										type="password"
-										placeholder="Придумайте пароль"
-										disabled=false
-										activeClass=""
-										ref="newPassword"
-										onInput=onInput
-										onBlur=onBlur
-										onFocus=onFocus
-									}}}
-									{{{ProfileLine
-										label="Повторите новый пароль"
-										name="confirmedPassword"
-										type="password"
-										placeholder="Повторите пароль"
-										disabled=false
-										activeClass=""
-										ref="confirmedPassword"
-										onInput=onInput
-										onBlur=onBlur
-										onFocus=onFocus
-									}}}
-								</div>
-						</div>
-						<div class="profile__button">
-							{{{Button
-								buttonClass="button-wrapper"
-								textClass="button"
-								type="submit"
-								text="Сохранить"
-								onClick=onClick
-							}}}
-						</div>
+					{{{Avatar
+						className="profile__avatar"
+						textClassName="avatar__text"
+					}}}
+					<p class="profile__id">ID: ${user ? user!.id : ''}</p>
+					<div class="profile__info">
+							<div class="profile__info-conainer">
+								{{{ProfileLine
+									label="Старый пароль"
+									name="oldPassword"
+									type="password"
+									placeholder="Пароль"
+									disabled=false
+									activeClass=""
+									ref="oldPassword"
+									onInput=onInput
+									onBlur=onBlur
+									onFocus=onFocus
+									value=""
+								}}}
+								{{{ProfileLine
+									label="Новый пароль"
+									name="newPassword"
+									type="password"
+									placeholder="Пароль"
+									disabled=false
+									activeClass=""
+									ref="newPassword"
+									onInput=onInput
+									onBlur=onBlur
+									onFocus=onFocus
+								}}}
+								{{{ProfileLine
+									label="Повторите пароль"
+									name="confirmedPassword"
+									type="password"
+									placeholder="Пароль"
+									disabled=false
+									activeClass=""
+									ref="confirmedPassword"
+									onInput=onInput
+									onBlur=onBlur
+									onFocus=onFocus
+								}}}
+							</div>
+					</div>
+					{{{Error
+						errorClass="form-page__error"
+						errorText=formError
+					}}}
+					<div class="profile__buttons">
+						{{{Button
+							buttonClass="button-wrapper"
+							textClass="button"
+							type="submit"
+							text="Сохранить"
+							onClick=savePassword
+						}}}
+						<div class="empty-box"></div>
+						{{{ProfileLink
+							className="blue-link"
+							addClassName="centered"
+							text="Отмена"
+							onClick=cancelChangePassword
+						}}}
+					</div>
 				</main>
 			</div>
 		`;
 	}
 }
+
+const ComposedChangePassword = withRouter(withStore(ChangePasswordPage));
+
+export { ComposedChangePassword as ChangePasswordPage };
