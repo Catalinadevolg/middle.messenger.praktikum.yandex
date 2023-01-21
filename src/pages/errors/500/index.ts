@@ -1,6 +1,1 @@
-import { renderDOM } from 'core/renderDOM';
-import Error500 from './500';
-
-document.addEventListener('DOMContentLoaded', () => {
-	renderDOM(new Error500());
-});
+export { Error500Page } from './500';

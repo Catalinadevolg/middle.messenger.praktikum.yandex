@@ -1,13 +1,42 @@
-import Block from 'core/Block';
+import { Block, CoreRouter, Store } from 'core';
+import { withRouter, withStore } from 'utils';
 
-export default class Error500 extends Block {
+type Error500PageProps = {
+	router: CoreRouter;
+	store: Store<AppState>;
+	toMessenger?: () => void;
+};
+
+class Error500Page extends Block<Error500PageProps> {
+	static componentName = 'Error500Page';
+
+	constructor(props: Error500PageProps) {
+		super(props);
+
+		this.setProps({
+			toMessenger: () => this.toMessenger(),
+		});
+	}
+
+	toMessenger() {
+		this.props.router.go('/messenger');
+	}
+
 	render() {
 		return `
-		<div class="error-page">
+		<main class="error-page">
 			<p class="error-page__title">500</p>
 			<p class="error-page__text">Мы уже фиксим</p>
-			<a href="messenger.html" class="error-page__link">Назад к чатам</a>
-		</div>
+			{{{Link
+				linkClass="error-page__link"
+				text="Назад к чатам"
+				onClick=toMessenger
+			}}}
+		</main>
 		`;
 	}
 }
+
+const ComposedError500 = withRouter(withStore(Error500Page));
+
+export { ComposedError500 as Error500Page };

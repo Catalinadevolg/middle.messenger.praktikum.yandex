@@ -1,48 +1,144 @@
-import Block from 'core/Block';
+import { Block, CoreRouter, Store, BlockProps } from 'core';
+import { validateForm, withRouter, withStore } from 'utils';
+import { changeInfo, logout } from 'services';
 
-import defaultAvatar from 'assets/empty-avatar.png';
+type ProfilePageProps = {
+	router: CoreRouter;
+	store: Store<AppState>;
+	user: User | null;
+	toChats: () => void;
+	changeInfo?: () => void;
+	onChangePassword?: () => void;
+	onSignin?: () => void;
+	deactivatedChange: boolean;
+	saveInfo?: () => void;
+	cancelChangeInfo?: () => void;
+};
 
-export default class ProfilePage extends Block {
-	constructor() {
-		super();
+class ProfilePage extends Block<ProfilePageProps> {
+	constructor(props: ProfilePageProps) {
+		super(props);
 
 		this.setProps({
-			userInfo: {
-				userAvatar: defaultAvatar,
-				email: 'pochta@yandex.ru',
-				login: 'ivanivanov',
-				first_name: 'Иван',
-				second_name: 'Иванов',
-				display_name: 'Иван',
-				phone: '+79991234567',
-			},
-			ChangeInfo: () => {
-				const allInputs = this.refs;
-				Object.values(allInputs).forEach((input) => {
-					//@ts-ignore
-					const arrProps = [input.props];
-					for (let i = 0; i < arrProps.length; i++) {
-						arrProps[i].disabled = false;
-						arrProps[i].activeClass = 'active-input';
-					}
-				});
-			},
+			toChats: () => this.toChats(),
+			deactivatedChange: true,
+			changeInfo: () => this.changeInfo(),
+			onChangePassword: () => this.onChangePassword(),
+			onSignin: () => this.onSignin(),
+			saveInfo: () => this.saveInfo(),
+			cancelChangeInfo: () => this.cancelChangeInfo(),
 		});
 	}
 
+	toChats() {
+		this.props.router.go('/messenger');
+	}
+
+	changeInfo() {
+		const allInputs = [];
+
+		for (const key in this.refs) {
+			allInputs.push(key);
+		}
+
+		this.props.deactivatedChange = false;
+
+		allInputs.forEach((input) => {
+			//@ts-ignore
+			const arrProps = this.refs[input].props;
+			arrProps.disabled = false;
+			arrProps.activeClass = 'active-input';
+		});
+	}
+
+	onChangePassword() {
+		this.props.router.go('/password');
+	}
+	onSignin() {
+		this.props.store.dispatch({
+			appIsInited: false,
+			isLoading: false,
+			loginFormError: null,
+			user: null,
+		});
+		this.props.store.dispatch(logout);
+	}
+
+	saveInfo() {
+		const formData: Record<string, unknown> = {};
+		let errors = false;
+
+		Object.values(this.refs).forEach((ref: Block<BlockProps>) => {
+			// @ts-ignore
+			const inputEl = ref.refs.inputRef.getContent() as HTMLInputElement;
+
+			formData[inputEl.name] = inputEl.value;
+
+			const errorText = validateForm(inputEl.name, inputEl.value);
+
+			if (errors === false && errorText) {
+				errors = true;
+			}
+
+			// @ts-ignore
+			ref.refs.errorRef.setProps({
+				errorText: errorText,
+			});
+		});
+
+		if (errors === false && formData) {
+			this.props.store.dispatch(changeInfo, formData);
+
+			const allInputs = [];
+
+			for (const key in this.refs) {
+				allInputs.push(key);
+			}
+			allInputs.forEach((input) => {
+				//@ts-ignore
+				const arrProps = this.refs[input].props;
+				arrProps.disabled = true;
+				arrProps.activeClass = '';
+			});
+
+			this.props.deactivatedChange = true;
+		}
+	}
+
+	cancelChangeInfo() {
+		const allInputs = [];
+
+		for (const key in this.refs) {
+			allInputs.push(key);
+		}
+		allInputs.forEach((input) => {
+			//@ts-ignore
+			const arrProps = this.refs[input].props;
+			arrProps.disabled = true;
+			arrProps.activeClass = '';
+		});
+
+		this.props.deactivatedChange = true;
+	}
+
 	render() {
+		const user = this.props.store.getState().user;
+
 		return `
 			<div class="profile__container">
-				<a href="messenger.html" class="profile__back-btn">
-						<div class="back-btn"></div>
-				</a>
-				<div class="profile">
+				<div class="profile__back-btn">
+					{{{Button
+						buttonClass="back-btn"
+						type="button"
+						onClick=toChats
+					}}}
+				</div>
+				<main class="profile">
 						{{{Avatar
-							userAvatar=userInfo.userAvatar
 							className="profile__avatar"
 							textClassName="avatar__text"
 						}}}
-						<p class="profile__name">Иван</p>
+						<p class="profile__id">ID: ${user ? user!.id : ''}</p>
 						<div class="profile__info">
 								<div class="profile__info-conainer">
 								  {{{ProfileLine
@@ -53,7 +149,7 @@ export default class ProfilePage extends Block {
 										placeholder="Укажите почту"
 										disabled=true
 										activeClass=""
-										value=userInfo.email
+										value="${user ? user!.email : ''}"
 									}}}
 									{{{ProfileLine
 										ref="login"
@@ -63,7 +159,7 @@ export default class ProfilePage extends Block {
 										placeholder="Введите логин"
 										disabled=true
 										activeClass=""
-										value=userInfo.login
+										value="${user ? user!.login : ''}"
 									}}}
 									{{{ProfileLine
 										ref="first_name"
@@ -73,7 +169,7 @@ export default class ProfilePage extends Block {
 										placeholder="Введите имя"
 										disabled=true
 										activeClass=""
-										value=userInfo.first_name
+										value="${user ? user!.firstName : ''}"
 									}}}
 									{{{ProfileLine
 										ref="second_name"
@@ -83,7 +179,7 @@ export default class ProfilePage extends Block {
 										placeholder="Введите фамилию"
 										disabled=true
 										activeClass=""
-										value=userInfo.second_name
+										value="${user ? user!.secondName : ''}"
 									}}}
 									{{{ProfileLine
 										ref="display_name"
@@ -93,7 +189,7 @@ export default class ProfilePage extends Block {
 										placeholder="Укажите имя для чата"
 										disabled=true
 										activeClass=""
-										value=userInfo.display_name
+										value="${user ? (user!.displayName ? user!.displayName : user!.firstName) : ''}"
 									}}}
 									{{{ProfileLine
 										ref="phone"
@@ -103,27 +199,47 @@ export default class ProfilePage extends Block {
 										placeholder="Укажите телефон"
 										disabled=true
 										activeClass=""
-										value=userInfo.phone
+										value="${user ? user!.phone : ''}"
 									}}}
 								</div>
 						</div>
-						{{{ProfileLink
-							link="changeInfo.html"
-							className="blue-link"
-							text="Изменить данные"
-						}}}
-						{{{ProfileLink
-							link="changePassword.html"
-							className="blue-link"
-							text="Изменить пароль"
-						}}}
-						{{{ProfileLink
-							link="signin.html"
-							className="red-link"
-							text="Выйти"
-						}}}
-				</div>
+						{{#if deactivatedChange}}
+							{{{ProfileLink
+								className="blue-link"
+								text="Изменить данные"
+								onClick=changeInfo
+							}}}
+							{{{ProfileLink
+								className="blue-link"
+								text="Изменить пароль"
+								onClick=onChangePassword
+							}}}
+							{{{ProfileLink
+								className="red-link"
+								text="Выйти"
+								onClick=onSignin
+							}}}
+						{{else}}
+							{{{Button
+								buttonClass="button-wrapper"
+								textClass="button"
+								type="submit"
+								text="Сохранить"
+								onClick=saveInfo
+							}}}
+							{{{ProfileLink
+								className="blue-link"
+								addClassName="centered"
+								text="Отмена"
+								onClick=cancelChangeInfo
+							}}}
+						{{/if}}
+				</main>
 			</div>
 		`;
 	}
 }
+
+const ComposedProfile = withRouter(withStore(ProfilePage));
+
+export { ComposedProfile as ProfilePage };

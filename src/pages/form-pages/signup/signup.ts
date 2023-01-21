@@ -1,34 +1,72 @@
-import Block from 'core/Block';
-import { validateForm } from 'helpers/validateForm';
+import { Block, CoreRouter, Store, BlockProps } from 'core';
+import { validateForm, withRouter, withStore } from 'utils';
+import { signup } from 'services';
 
-export default class SignupPage extends Block {
-	constructor() {
-		super();
+type SignupPageProps = {
+	router: CoreRouter;
+	store: Store<AppState>;
+	onSignup?: () => void;
+	toSignin?: () => void;
+	formError?: () => void;
+};
+
+class SignupPage extends Block<SignupPageProps> {
+	constructor(props: SignupPageProps) {
+		super(props);
 
 		this.setProps({
-			onSubmit: () => {
-				const formData: any = {};
-
-				Object.values(this.refs).forEach((ref: any) => {
-					const inputEl = ref.refs.inputRef.getContent() as HTMLInputElement;
-
-					formData[inputEl.name] = inputEl.value;
-
-					const errorText = validateForm(inputEl.name, inputEl.value);
-
-					ref.refs.errorRef.setProps({
-						errorText: errorText,
-					});
-				});
-
-				console.log(formData);
-			},
+			onSignup: () => this.onSignup(),
+			toSignin: () => this.toSignin(),
+			formError: () => this.displayError(),
 		});
+	}
+
+	displayError() {
+		const error = this.props.store.getState().loginFormError;
+		if (error === 'Login already exists') {
+			return 'Логин уже существует';
+		}
+		if (error === 'Email already exists') {
+			return 'Email уже используется';
+		}
+
+		return error;
+	}
+
+	onSignup() {
+		const formData: Record<string, unknown> = {};
+		let errors = false;
+
+		Object.values(this.refs).forEach((ref: Block<BlockProps>) => {
+			// @ts-ignore
+			const inputEl = ref.refs.inputRef.getContent() as HTMLInputElement;
+
+			formData[inputEl.name] = inputEl.value;
+
+			const errorText = validateForm(inputEl.name, inputEl.value);
+
+			if (errors === false && errorText) {
+				errors = true;
+			}
+
+			// @ts-ignore
+			ref.refs.errorRef.setProps({
+				errorText: errorText,
+			});
+		});
+
+		if (errors === false && formData) {
+			this.props.store.dispatch(signup, formData);
+		}
+	}
+
+	toSignin() {
+		this.props.router.go('/sign-in');
 	}
 
 	render() {
 		return `
-		<div class="form-page signup">
+		<main class="form-page signup">
 			<div class="form-page__container">
 				<h1 class="form-page__title">Регистрация</h1>
 				<form class="form-page__form">
@@ -39,6 +77,8 @@ export default class SignupPage extends Block {
 							type='text'
 							name='email'
 							placeholder='Почта'
+							controlledInputClassName='controlled-input'
+							inputClassName='input__input'
 						}}}
 						{{{ControlledInput
 							ref='login'
@@ -46,6 +86,8 @@ export default class SignupPage extends Block {
 							type='text'
 							name='login'
 							placeholder='Логин'
+							controlledInputClassName='controlled-input'
+							inputClassName='input__input'
 						}}}
 						{{{ControlledInput
 							ref='first_name'
@@ -53,6 +95,8 @@ export default class SignupPage extends Block {
 							type='text'
 							name='first_name'
 							placeholder='Имя'
+							controlledInputClassName='controlled-input'
+							inputClassName='input__input'
 						}}}
 						{{{ControlledInput
 							ref='second_name'
@@ -60,6 +104,8 @@ export default class SignupPage extends Block {
 							type='text'
 							name='second_name'
 							placeholder='Фамилия'
+							controlledInputClassName='controlled-input'
+							inputClassName='input__input'
 						}}}
 						{{{ControlledInput
 							ref='phone'
@@ -67,13 +113,17 @@ export default class SignupPage extends Block {
 							type='text'
 							name='phone'
 							placeholder='Телефон'
+							controlledInputClassName='controlled-input'
+							inputClassName='input__input'
 						}}}
 						{{{ControlledInput
-							ref='newPassword'
+							ref='password'
 							label='Пароль'
 							type='password'
-							name='newPassword'
+							name='password'
 							placeholder='Пароль'
+							controlledInputClassName='controlled-input'
+							inputClassName='input__input'
 						}}}
 						{{{ControlledInput
 							ref='confirmedPassword'
@@ -81,20 +131,35 @@ export default class SignupPage extends Block {
 							type='password'
 							name='confirmedPassword'
 							placeholder='Пароль (ещё раз)'
+							controlledInputClassName='controlled-input'
+							inputClassName='input__input'
 						}}}
 					</div>
+					{{{Error
+						errorClass="form-page__error"
+						errorText=formError
+					}}}
 					<div class="form-page__btns">
 						{{{Button
 							buttonClass="button-wrapper"
 							textClass="button"
+							type="submit"
 							text='Зарегистрироваться'
-							onSubmit=onSubmit
+							onClick=onSignup
 						}}}
-						<a href="signin.html" class="form-page__link">Войти</a>
+						{{{Link
+							linkClass="form-page__link"
+							text="Войти"
+							onClick=toSignin
+						}}}
 					</div>
 				</form>
 			</div>
-		</div>
+		</main>
 		`;
 	}
 }
+
+const ComposedSignup = withRouter(withStore(SignupPage));
+
+export { ComposedSignup as SignupPage };

@@ -1,4 +1,4 @@
-import Block from './Block';
+import { Block } from 'core';
 
 export function renderDOM(block: Block) {
 	const root = document.querySelector('#app');

@@ -1,23 +1,25 @@
-import Block from 'core/Block';
+import { Block, BlockProps } from 'core';
 
-interface ChatListItemProps {
-	className?: string;
-	userAvatar: string;
-	userName: string;
-	lastMessage: string;
-	lastMessageDate: Date;
+type ChatListItemProps = BlockProps & {
+	blueClass: string;
+	dataID: number;
+	userAvatar?: string;
+	userName?: string;
+	lastMessage?: string;
+	lastMessageDate?: Date;
 	newMessagesCount?: number;
-}
-export class ChatListItem extends Block {
+	onClick?: () => void;
+};
+export class ChatListItem extends Block<ChatListItemProps> {
 	static componentName = 'ChatListItem';
 
-	constructor({ ...props }: ChatListItemProps) {
-		super({ ...props });
+	constructor({ onClick, ...props }: ChatListItemProps) {
+		super({ ...props, events: { click: onClick } });
 	}
 
 	render() {
 		return `
-			<li class="chat-list-item {{className}}">
+			<li class="chat-list-item {{blueClass}}" data-id="id-{{dataID}}">
 				<div class="chat-list-item__photo">
 						<img src="{{userAvatar}}" alt="avatar" class="photo-img">
 				</div>

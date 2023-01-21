@@ -1,7 +1,7 @@
-import Block from 'core/Block';
-import { validateForm } from 'helpers/validateForm';
+import { Block, BlockProps } from 'core';
+import { validateForm } from 'utils/validateForm';
 
-interface ProfileLineProps {
+type ProfileLineProps = BlockProps & {
 	label: string;
 	name: 'oldPassword' | 'newPassword' | 'confirmedPassword';
 	value?: string;
@@ -9,10 +9,10 @@ interface ProfileLineProps {
 	placeholder?: string;
 	activeClass?: string;
 	disabled?: boolean;
-	onInput?: () => void;
-	onBlur?: () => void;
-	onFocus?: () => void;
-}
+	onInput?: (e: FocusEvent) => void;
+	onBlur?: (e: FocusEvent) => void;
+	onFocus?: (e: FocusEvent) => void;
+};
 export class ProfileLine extends Block<ProfileLineProps> {
 	static componentName = 'ProfileLine';
 
