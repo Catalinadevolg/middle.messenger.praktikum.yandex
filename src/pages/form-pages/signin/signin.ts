@@ -1,4 +1,4 @@
-import { Block, CoreRouter, Store } from 'core';
+import { Block, CoreRouter, Store, BlockProps } from 'core';
 import { validateForm, withRouter, withStore } from 'utils';
 import { signin } from 'services';
 
@@ -18,18 +18,16 @@ class SigninPage extends Block<SigninPageProps> {
 		this.setProps({
 			onSignin: () => this.onSignin(),
 			toSignup: () => this.toSignup(),
-			// TODO:
-			// 1. При переходе на signup formError не обновляется
-			// 2. При ошибке 'User already in system' добавить кнопку для перехода в мессенджер
 			formError: () => this.displayError(),
 		});
 	}
 
 	onSignin() {
-		const formData: any = {};
+		const formData: Record<string, unknown> = {};
 		let errors = false;
 
-		Object.values(this.refs).forEach((ref: any) => {
+		Object.values(this.refs).forEach((ref: Block<BlockProps>) => {
+			// @ts-ignore
 			const inputEl = ref.refs.inputRef.getContent() as HTMLInputElement;
 
 			formData[inputEl.name] = inputEl.value;
@@ -40,6 +38,7 @@ class SigninPage extends Block<SigninPageProps> {
 				errors = true;
 			}
 
+			// @ts-ignore
 			ref.refs.errorRef.setProps({
 				errorText: errorText,
 			});
@@ -47,7 +46,6 @@ class SigninPage extends Block<SigninPageProps> {
 
 		if (errors === false && formData) {
 			this.props.store.dispatch(signin, formData);
-			console.log(this.props.store.getState().loginFormError);
 		}
 	}
 

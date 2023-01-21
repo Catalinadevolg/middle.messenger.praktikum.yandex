@@ -6,7 +6,6 @@ type BubbleMessengerProps = BlockProps & {
 	store: Store<AppState>;
 	activeBubble: string;
 	activeModal: string;
-	openSettings?: () => void;
 	openModalAddUser?: () => void;
 	openModalDeleteUser?: () => void;
 	cancelСlick?: () => void;
@@ -25,7 +24,6 @@ class BubbleMessenger extends Block<BubbleMessengerProps> {
 			activeBubble: '',
 			activeModal: '',
 			modalStatus: 'add',
-			// openSettings: () => this.openSettings(),
 			openModalAddUser: () => this.openModalAddUser(),
 			openModalDeleteUser: () => this.openModalDeleteUser(),
 			cancelСlick: () => this.cancelСlick(),
@@ -125,7 +123,6 @@ class BubbleMessenger extends Block<BubbleMessengerProps> {
 	}
 
 	render(): string {
-		console.log('Рендер Buble');
 		const users = this.props.store.getState().users;
 
 		return `

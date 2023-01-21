@@ -13,30 +13,32 @@ type Options = {
 	timeout?: number;
 };
 
+type HTTPMethod = (url: string, options?: Options) => Promise<unknown>;
+
 export class HTTPTransport {
-	get = (url: string, options: Options = {}) => {
-		return this.request(url, { ...options }, METHODS.GET);
+	BaseURL = 'https://ya-praktikum.tech/api/v2';
+
+	get: HTTPMethod = (url, options = {}) => {
+		return this.request(this.BaseURL + url, { ...options }, METHODS.GET);
 	};
 
-	post = (url: string, options: Options = {}) => {
-		return this.request(url, { ...options }, METHODS.POST);
+	post: HTTPMethod = (url, options = {}) => {
+		return this.request(this.BaseURL + url, { ...options }, METHODS.POST);
 	};
 
-	put = (url: string, options: Options = {}) => {
-		return this.request(url, { ...options }, METHODS.PUT);
+	put: HTTPMethod = (url, options = {}) => {
+		return this.request(this.BaseURL + url, { ...options }, METHODS.PUT);
 	};
 
-	delete = (url: string, options: Options = {}) => {
-		return this.request(url, { ...options }, METHODS.DELETE);
+	delete: HTTPMethod = (url, options = {}) => {
+		return this.request(this.BaseURL + url, { ...options }, METHODS.DELETE);
 	};
 
 	request = (url: string, options: Options, method: METHODS, timeout = 5000) => {
-		const { headers = {}, data } = options;
+		const { data } = options;
 
 		if (method === METHODS.GET && !!data) {
-			url = `https://ya-praktikum.tech/api/v2${url}${queryStringify(data)}`;
-		} else {
-			url = `https://ya-praktikum.tech/api/v2${url}`;
+			url = `{url}${queryStringify(data)}`;
 		}
 
 		return new Promise((resolve, reject) => {
@@ -51,12 +53,6 @@ export class HTTPTransport {
 			if (data instanceof File) {
 				formData.append('avatar', data);
 			}
-
-			// if (headers) {
-			// 	Object.keys(headers).forEach((key) => {
-			// 		xhr.setRequestHeader(key, headers[key]);
-			// 	});
-			// }
 
 			xhr.onload = () => {
 				const { response, status } = xhr;

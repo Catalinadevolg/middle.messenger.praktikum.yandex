@@ -24,20 +24,6 @@ export const transformChat = (data: ChatDTO): Chat => {
 	};
 };
 
-// Не нужно?
-export const transformChats = (data: ChatDTO[]): Chat[] => {
-	return data.map((chat) => {
-		return {
-			id: chat.id,
-			title: chat.title,
-			avatar: chat.avatar,
-			unreadCount: chat.unread_count,
-			lastMessage: transformMessage(chat.last_message),
-			createdBy: chat.created_by,
-		} as Chat;
-	});
-};
-
 export const transformMessage = (data?: MessageDTO): Message | null => {
 	return data
 		? {

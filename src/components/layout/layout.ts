@@ -1,5 +1,5 @@
 import { Block, CoreRouter } from 'core';
-import { withIsLoading, withRouter } from 'utils';
+import { withRouter } from 'utils';
 
 type LayoutProps = {
 	router: CoreRouter;
@@ -37,6 +37,6 @@ class Layout extends Block<LayoutProps> {
 	}
 }
 
-const ComposedLayout = withRouter(withIsLoading(Layout));
+const ComposedLayout = withRouter(Layout);
 
 export { ComposedLayout as Layout };

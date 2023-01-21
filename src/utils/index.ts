@@ -2,7 +2,6 @@ export { hasError as apiHasError } from './apiHasError';
 export {
 	transformUser,
 	transformChat,
-	transformChats,
 	transformMessage,
 	transformChatMessage,
 	transformChatId,
@@ -13,4 +12,3 @@ export { queryStringify } from './querystringify';
 export { validateForm } from './validateForm';
 export { withRouter } from './withRouter';
 export { withStore } from './withStore';
-export { withIsLoading } from './withIsLoading';

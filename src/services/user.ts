@@ -92,5 +92,14 @@ export const changePassword = async (
 		return;
 	}
 
-	dispatch({ isLoading: false, user: transformUser(responseUser as UserDTO) });
+	dispatch({
+		isLoading: false,
+		user: transformUser(responseUser as UserDTO),
+		loginFormError: 'Пароль успешно изменён',
+	});
+
+	setTimeout(() => {
+		dispatch({ loginFormError: null });
+		window.router.go('/profile');
+	}, 1000);
 };

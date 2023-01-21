@@ -113,7 +113,6 @@ export class Block<P extends BlockProps = BlockProps> {
 	}
 
 	init() {
-		console.log('init');
 		this._createResources();
 		this.eventBus().emit(Block.EVENTS.FLOW_RENDER, this.props);
 	}
@@ -132,12 +131,11 @@ export class Block<P extends BlockProps = BlockProps> {
 
 	componentWillUnmount() {}
 
-	// dispatchComponentDidMoun() {
-	// 	this.eventBus().emit(Block.EVENTS.FLOW_CDM);
-	// }
+	dispatchComponentDidMoun() {
+		this.eventBus().emit(Block.EVENTS.FLOW_CDM);
+	}
 
 	_componentDidUpdate(oldProps: P, newProps: P) {
-		console.log('_componentDidUpdate');
 		const response = this.componentDidUpdate(oldProps, newProps);
 		if (!response) {
 			return;
@@ -172,7 +170,6 @@ export class Block<P extends BlockProps = BlockProps> {
 	}
 
 	_render() {
-		console.log('_render');
 		const templateString = this.render();
 
 		const fragment = this.compile(templateString, { ...this.state, ...this.props });
@@ -219,8 +216,6 @@ export class Block<P extends BlockProps = BlockProps> {
 				const oldProps = { ...target };
 				target[prop] = value;
 
-				// Запускаем обновление компоненты
-				// Плохой cloneDeep, в след итерации нужно заставлять добавлять cloneDeep им самим
 				self.eventBus().emit(Block.EVENTS.FLOW_CDU, oldProps, target);
 				return true;
 			},
@@ -266,15 +261,15 @@ export class Block<P extends BlockProps = BlockProps> {
 	compile(templateString: string, context: any): DocumentFragment {
 		const fragment = document.createElement('template');
 
-		// Object.entries(this.children).forEach(([key, child]) => {
-		// 	if (Array.isArray(child)) {
-		// 		context[key] = child.map((ch) => `<div data-id="id-${ch.id}"></div>`);
+		Object.entries(this.children).forEach(([key, child]) => {
+			if (Array.isArray(child)) {
+				context[key] = child.map((ch) => `<div data-id="id-${ch.id}"></div>`);
 
-		// 		return;
-		// 	}
+				return;
+			}
 
-		// 	context[key] = `<div data-id="id-${child.id}"></div>`;
-		// });
+			context[key] = `<div data-id="id-${child.id}"></div>`;
+		});
 
 		/**
 		 * Рендерим шаблон
@@ -301,22 +296,11 @@ export class Block<P extends BlockProps = BlockProps> {
 				return;
 			}
 
-			//const stubChilds = stub.childNodes.length ? stub.childNodes : [];
-
 			/**
 			 * Заменяем заглушку на component._element
 			 */
 			const content = child.getContent();
 			stub.replaceWith(content);
-
-			/**
-			 * Ищем элемент layout-а, куда вставлять детей
-			 */
-			// const layoutContent = content.querySelector('[data-layout="1"]');
-			// console.log(layoutContent);
-			// if (layoutContent && stubChilds.length) {
-			// 	layoutContent.append(...stubChilds);
-			// }
 		});
 
 		/**

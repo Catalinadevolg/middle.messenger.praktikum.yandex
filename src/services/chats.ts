@@ -11,7 +11,6 @@ type ActionWithUserPayload = {
 	chatId: number;
 };
 
-// Не нужно??
 export const getChats = async (dispatch: Dispatch<AppState>) => {
 	dispatch({ isLoading: true });
 
