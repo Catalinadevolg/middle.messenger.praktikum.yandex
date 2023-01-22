@@ -98,14 +98,6 @@ class Socket extends EventBus {
 		});
 	}
 
-	// public send(data: unknown) {
-	// 	if (!this.socket) {
-	// 		throw new Error('Соединение с Websocket еще не установлено');
-	// 	} else {
-	// 		this.socket.send(JSON.stringify(data));
-	// 	}
-	// }
-
 	private getMessages() {
 		console.log('Загружаем сообщения');
 		return this.socket?.send(

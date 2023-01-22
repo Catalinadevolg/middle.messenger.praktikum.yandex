@@ -1,15 +1,15 @@
 import { Block, BlockProps, Store } from 'core';
 import { validateForm, withStore } from 'utils';
-import { addUser, deleteUser, getChatUsers } from 'services/chats';
+import { addUser, deleteUser, getChatUsers, deleteChat } from 'services';
 
 type BubbleMessengerProps = BlockProps & {
 	store: Store<AppState>;
 	activeBubble: string;
 	activeModal: string;
-	openSettings?: () => void;
 	openModalAddUser?: () => void;
 	openModalDeleteUser?: () => void;
 	cancelСlick?: () => void;
+	deleteChat?: () => void;
 	addUser?: () => void;
 	deleteUser?: (e: FocusEvent) => void;
 	modalStatus: 'add' | 'remove';
@@ -25,13 +25,18 @@ class BubbleMessenger extends Block<BubbleMessengerProps> {
 			activeBubble: '',
 			activeModal: '',
 			modalStatus: 'add',
-			// openSettings: () => this.openSettings(),
 			openModalAddUser: () => this.openModalAddUser(),
 			openModalDeleteUser: () => this.openModalDeleteUser(),
 			cancelСlick: () => this.cancelСlick(),
+			deleteChat: () => this.deleteChat(),
 			addUser: () => this.addUser(),
 			deleteUser: (e: FocusEvent) => this.deleteUser(e),
 		});
+	}
+
+	deleteChat() {
+		const chatId = this.props.store.getState().activeChat?.id;
+		this.props.store.dispatch(deleteChat, { chatId });
 	}
 
 	openModalAddUser() {
@@ -125,8 +130,8 @@ class BubbleMessenger extends Block<BubbleMessengerProps> {
 	}
 
 	render(): string {
-		console.log('Рендер Buble');
-		const users = this.props.store.getState().users;
+		const state = this.props.store.getState();
+		const users = state.users;
 
 		return `
 		<div>
@@ -149,7 +154,19 @@ class BubbleMessenger extends Block<BubbleMessengerProps> {
 								onClick=openModalDeleteUser
 							}}}
 						</div>
-					</div>
+						${
+							state.user!.id === state.activeChat?.createdBy
+								? `<div class="chat-menu__row">
+								<div class="chat-menu__icon icon-delete"></div>
+								{{{Link
+									linkClass="chat-menu__text"
+									text="Удалить чат"
+									onClick=deleteChat
+								}}}
+							</div>
+						</div>`
+								: ''
+						}
 				</div>
 			</div>
 			<div class="add-user__modal${this.props.activeModal}">

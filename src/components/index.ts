@@ -7,7 +7,6 @@ export { ControlledInput } from './controlled-input';
 export { Error } from './error';
 export { Input } from './input';
 export { InputForProfile } from './input-for-profile';
-export { LinkForOnboarding } from './link-for-onboarding';
 export { Layout } from './layout';
 export { Link } from './link';
 export { Message } from './message';

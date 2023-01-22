@@ -35,6 +35,7 @@ class ChatList extends Block<ChatListProps> {
 
 			const chatTitle = chatInfo.title;
 			const avatar = chatInfo.avatar;
+			const createdBy = chatInfo.createdBy;
 
 			console.log('Загружаем чат');
 			this.props.store.dispatch({
@@ -42,6 +43,7 @@ class ChatList extends Block<ChatListProps> {
 					id: chatID,
 					title: chatTitle,
 					avatar: avatar,
+					createdBy: createdBy,
 				},
 			});
 

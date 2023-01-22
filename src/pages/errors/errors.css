@@ -1,31 +1,32 @@
 .error-page {
-    display: flex;
-    flex-direction: column;
+	display: flex;
+	flex-direction: column;
 
-    margin: auto;
+	margin: auto;
 }
 
 .error-page__title {
-    font-size: 40px;
-    line-height: 40px;
+	font-size: 40px;
+	line-height: 40px;
 }
 
 .error-page__text {
-    margin: 20px 0 69px;
+	margin: 20px 0 69px;
 
-    font-size: 20px;
-    line-height: 20px;
+	font-size: 20px;
+	line-height: 20px;
 }
 
 .error-page__link {
-    margin: auto;
+	margin: auto;
 
-    color: var(--link-blue-color);
+	color: var(--link-blue-color);
 
-    font-size: 11px;
-    line-height: 11px;
+	font-size: 11px;
+	line-height: 11px;
+	background: none;
 }
 
 .error-page__link:hover {
-    border-bottom: 1px solid rgb(51 105 243 / 100%);
+	border-bottom: 1px solid rgb(51 105 243 / 100%);
 }

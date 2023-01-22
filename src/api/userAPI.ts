@@ -15,11 +15,17 @@ type PasswordRequestData = {
 	oldPassword: string;
 	newPassword: string;
 };
+const options = {
+	headers: {
+		Accept: 'application/json',
+		'Content-Type': 'application/json',
+	},
+};
 
 export const userAPI = {
 	changeInfo: (data: UserRequestData) => HTTPTransport.put('/user/profile', { data }),
 
 	changePassword: (data: PasswordRequestData) => HTTPTransport.put('/user/password', { data }),
 
-	changeAvatar: (data: UserRequestData) => HTTPTransport.put('/user/profile/avatar', { data }),
+	changeAvatar: (data: File) => HTTPTransport.put('/user/profile/avatar', { ...options, data }),
 };

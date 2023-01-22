@@ -1,4 +1,4 @@
-import { Block, CoreRouter, Store } from 'core';
+import { Block, CoreRouter, Store, BlockProps } from 'core';
 import { changePassword } from 'services';
 import { validateForm, withRouter, withStore } from 'utils';
 
@@ -34,10 +34,11 @@ class ChangePasswordPage extends Block<ChangePasswordPageProps> {
 	}
 
 	savePassword() {
-		const formData: any = {};
+		const formData: Record<string, unknown> = {};
 		let errors = false;
 
-		Object.values(this.refs).forEach((ref: any) => {
+		Object.values(this.refs).forEach((ref: Block<BlockProps>) => {
+			// @ts-ignore
 			const inputEl = ref.refs.inputRef.getContent() as HTMLInputElement;
 
 			let errorText = validateForm(inputEl.name, inputEl.value);
@@ -54,6 +55,7 @@ class ChangePasswordPage extends Block<ChangePasswordPageProps> {
 				errors = true;
 			}
 
+			// @ts-ignore
 			ref.refs.errorRef.setProps({
 				errorText: errorText,
 			});
@@ -61,8 +63,6 @@ class ChangePasswordPage extends Block<ChangePasswordPageProps> {
 
 		if (errors === false && formData) {
 			this.props.store.dispatch(changePassword, formData);
-			console.log(this.props.store.getState().loginFormError);
-			// this.props.router.go('/profile');
 		}
 	}
 
@@ -97,6 +97,7 @@ class ChangePasswordPage extends Block<ChangePasswordPageProps> {
 						textClassName="avatar__text"
 					}}}
 					<p class="profile__id">ID: ${user ? user!.id : ''}</p>
+					<form>
 					<div class="profile__info">
 							<div class="profile__info-conainer">
 								{{{ProfileLine
@@ -158,6 +159,7 @@ class ChangePasswordPage extends Block<ChangePasswordPageProps> {
 							onClick=cancelChangePassword
 						}}}
 					</div>
+					</form>
 				</main>
 			</div>
 		`;

@@ -1,6 +1,7 @@
 import { EventBus } from './EventBus';
 import { nanoid } from 'nanoid';
 import Handlebars from 'handlebars';
+import { isEqual } from 'utils/isEqual';
 
 type Events = Values<typeof Block.EVENTS>;
 
@@ -22,10 +23,8 @@ export class Block<P extends BlockProps = BlockProps> {
 
 	public id = nanoid(6);
 	protected _element: Nullable<HTMLElement> = null;
-	// @ts-ignore
-	private _meta: { props: P };
 
-	protected readonly props: P;
+	protected props: P;
 	protected children: { [id: string]: Block } = {};
 	private eventBus: () => EventBus<Events>;
 
@@ -40,28 +39,18 @@ export class Block<P extends BlockProps = BlockProps> {
 	 *
 	 * @returns {void}
 	 */
-	public constructor(propsAndChildren: P = {} as P) {
+	public constructor(props?: P) {
 		const eventBus = new EventBus<Events>();
-
-		const { props, children } = this.getPropsAndChildren(propsAndChildren);
-
-		this.children = children;
-
-		this._meta = {
-			props,
-		};
 
 		this.getStateFromProps(props);
 
 		this.props = this._makePropsProxy(props || ({} as P));
 		this.state = this._makePropsProxy(this.state);
 
-		this.initChildren();
-
 		this.eventBus = () => eventBus;
 
 		this._registerEvents(eventBus);
-		eventBus.emit(Block.EVENTS.INIT, this.props);
+		eventBus.emit(Block.EVENTS.INIT);
 	}
 
 	/**
@@ -76,25 +65,8 @@ export class Block<P extends BlockProps = BlockProps> {
 			return;
 		}
 
-		this.eventBus().emit(Block.EVENTS.FLOW_CWU, this.props);
+		this.eventBus().emit(Block.EVENTS.FLOW_CWU);
 	}
-
-	getPropsAndChildren(propsAndChildren: P) {
-		const children: Record<Keys<P>, Block> = {} as Record<Keys<P>, Block>;
-		const props: P = {} as P;
-
-		(Object.entries(propsAndChildren) as Array<[Keys<P>, any]>).forEach(([key, value]) => {
-			if (value instanceof Block) {
-				children[key] = value;
-			} else {
-				props[key] = value;
-			}
-		});
-
-		return { props, children };
-	}
-
-	protected initChildren() {}
 
 	_registerEvents(eventBus: EventBus<Events>) {
 		eventBus.on(Block.EVENTS.INIT, this.init.bind(this));
@@ -108,17 +80,18 @@ export class Block<P extends BlockProps = BlockProps> {
 		this._element = this._createDocumentElement('div');
 	}
 
-	protected getStateFromProps(_props: P): void {
+	protected getStateFromProps(_props: P | undefined): void {
 		this.state = {};
 	}
 
 	init() {
-		console.log('init');
 		this._createResources();
-		this.eventBus().emit(Block.EVENTS.FLOW_RENDER, this.props);
+		this.eventBus().emit(Block.EVENTS.FLOW_RENDER);
 	}
 
 	_componentDidMount(props: P) {
+		this._checkInDom();
+
 		this.componentDidMount(props);
 	}
 
@@ -132,23 +105,18 @@ export class Block<P extends BlockProps = BlockProps> {
 
 	componentWillUnmount() {}
 
-	// dispatchComponentDidMoun() {
-	// 	this.eventBus().emit(Block.EVENTS.FLOW_CDM);
-	// }
-
 	_componentDidUpdate(oldProps: P, newProps: P) {
-		console.log('_componentDidUpdate');
 		const response = this.componentDidUpdate(oldProps, newProps);
-		if (!response) {
+		if (response) {
 			return;
 		}
 
-		this._render();
+		this.eventBus().emit(Block.EVENTS.FLOW_RENDER);
 	}
 
 	// Может переопределять пользователь, необязательно трогать
-	componentDidUpdate(_oldProps: P, _newProps: P) {
-		return true;
+	componentDidUpdate(oldProps: P, newProps: P) {
+		return isEqual(oldProps, newProps);
 	}
 
 	setProps = (nextProps: Partial<P>) => {
@@ -158,6 +126,8 @@ export class Block<P extends BlockProps = BlockProps> {
 
 		Object.assign(this.props, nextProps);
 	};
+
+	getProps = () => this.props;
 
 	setState = (nextState: any) => {
 		if (!nextState) {
@@ -172,15 +142,15 @@ export class Block<P extends BlockProps = BlockProps> {
 	}
 
 	_render() {
-		console.log('_render');
 		const templateString = this.render();
 
 		const fragment = this.compile(templateString, { ...this.state, ...this.props });
 
 		const newElement = fragment.firstElementChild as HTMLElement;
 
+		this._removeEvents();
+
 		if (this._element) {
-			this._removeEvents();
 			this._element.replaceWith(newElement);
 		}
 
@@ -219,8 +189,6 @@ export class Block<P extends BlockProps = BlockProps> {
 				const oldProps = { ...target };
 				target[prop] = value;
 
-				// Запускаем обновление компоненты
-				// Плохой cloneDeep, в след итерации нужно заставлять добавлять cloneDeep им самим
 				self.eventBus().emit(Block.EVENTS.FLOW_CDU, oldProps, target);
 				return true;
 			},
@@ -258,23 +226,8 @@ export class Block<P extends BlockProps = BlockProps> {
 		});
 	}
 
-	// _createDocumentElement(tagName: string): HTMLElement {
-	// 	// Можно сделать метод, который через фрагменты в цикле создаёт сразу несколько блоков
-	// 	return document.createElement(tagName);
-	// }
-
 	compile(templateString: string, context: any): DocumentFragment {
 		const fragment = document.createElement('template');
-
-		// Object.entries(this.children).forEach(([key, child]) => {
-		// 	if (Array.isArray(child)) {
-		// 		context[key] = child.map((ch) => `<div data-id="id-${ch.id}"></div>`);
-
-		// 		return;
-		// 	}
-
-		// 	context[key] = `<div data-id="id-${child.id}"></div>`;
-		// });
 
 		/**
 		 * Рендерим шаблон
@@ -288,6 +241,7 @@ export class Block<P extends BlockProps = BlockProps> {
 		});
 
 		fragment.innerHTML = htmlString;
+		// console.log(fragment);
 		/**
 		 * Заменяем заглушки на компоненты
 		 */
@@ -301,22 +255,11 @@ export class Block<P extends BlockProps = BlockProps> {
 				return;
 			}
 
-			//const stubChilds = stub.childNodes.length ? stub.childNodes : [];
-
 			/**
 			 * Заменяем заглушку на component._element
 			 */
 			const content = child.getContent();
 			stub.replaceWith(content);
-
-			/**
-			 * Ищем элемент layout-а, куда вставлять детей
-			 */
-			// const layoutContent = content.querySelector('[data-layout="1"]');
-			// console.log(layoutContent);
-			// if (layoutContent && stubChilds.length) {
-			// 	layoutContent.append(...stubChilds);
-			// }
 		});
 
 		/**

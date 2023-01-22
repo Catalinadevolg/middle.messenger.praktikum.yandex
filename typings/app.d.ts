@@ -20,6 +20,7 @@ declare global {
 			id: Nullable<number>;
 			title: Nullable<string>;
 			avatar: Nullable<string>;
+			createdBy: Nullable<number>;
 		} | null;
 	};
 

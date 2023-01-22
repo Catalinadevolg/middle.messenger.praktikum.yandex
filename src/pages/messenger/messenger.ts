@@ -4,9 +4,6 @@ import { getChats } from 'services';
 
 import defaultAvatar from 'assets/empty-avatar.png';
 
-// Поиск не реализован, в проектной работе не обязателен
-// Добавить возможность изменять аватарку на общем чате
-
 type MessengerPageProps = {
 	router: CoreRouter;
 	store: Store<AppState>;
@@ -40,11 +37,9 @@ class MessengerPage extends Block<MessengerPageProps> {
 	openModalWindow() {
 		// @ts-ignore
 		this.refs.createChatModal.props.modalClassName = '_active';
-		console.log(this.props.store.getState());
 	}
 
 	render() {
-		console.log('Рендер Messenger');
 		const state = this.props.store.getState();
 
 		return `

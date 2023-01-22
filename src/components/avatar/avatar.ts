@@ -40,7 +40,6 @@ class Avatar extends Block<AvatarProps> {
 		this.props.file = file;
 
 		if (file) {
-			// TODO: добавить валидацию и вывод error при размере файла >1Mb
 			this.props.modalClassName = 'avatar__modal_active';
 			const src = URL.createObjectURL(file);
 			this.props.selectedAvatar = src;

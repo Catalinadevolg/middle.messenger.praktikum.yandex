@@ -32,14 +32,8 @@ class ChatBoxItem extends Block<ChatBoxItemProps> {
 		} else {
 			props.activeBubble = '';
 		}
-		// @ts-ignore
-		console.log(this.refs.bubbleMessenger.props);
 	}
 
-	// TODO:
-	// Добавить async сюда или к sendMessage in Socket?
-	// Обновлять lastMesaage в chatListItem после отправки сообщения
-	// Стилизовать buble-rows при наведении
 	sendMessage(e: SubmitEvent) {
 		e.preventDefault();
 
@@ -54,7 +48,6 @@ class ChatBoxItem extends Block<ChatBoxItemProps> {
 	render() {
 		const state = this.props.store.getState();
 		const messages = state.messages;
-		// console.log('Перерендер ЧатБокса');
 
 		return `
 			<div class="chat-box_active">
@@ -73,7 +66,7 @@ class ChatBoxItem extends Block<ChatBoxItemProps> {
 							}}}
 					</div>
 					<div class="chat-box__main">
-							<div class="chat-box__date"><time>Вывести дату!</time></div>
+							<!--<div class="chat-box__date"><time>Вывести дату!</time></div>-->
 								${
 									messages && messages.length > 0
 										? messages

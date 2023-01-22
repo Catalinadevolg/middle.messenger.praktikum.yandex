@@ -1,4 +1,4 @@
-import { Block, CoreRouter, Store } from 'core';
+import { Block, CoreRouter, Store, BlockProps } from 'core';
 import { validateForm, withRouter, withStore } from 'utils';
 import { changeInfo, logout } from 'services';
 
@@ -36,15 +36,9 @@ class ProfilePage extends Block<ProfilePageProps> {
 
 	changeInfo() {
 		const allInputs = [];
-		// const allLinks = [];
 
 		for (const key in this.refs) {
 			allInputs.push(key);
-			// if (key === 'info-link' || key === 'password-link' || key === 'logout-link') {
-			// 	allLinks.push(key);
-			// } else {
-			// 	allInputs.push(key);
-			// }
 		}
 
 		this.props.deactivatedChange = false;
@@ -55,22 +49,6 @@ class ProfilePage extends Block<ProfilePageProps> {
 			arrProps.disabled = false;
 			arrProps.activeClass = 'active-input';
 		});
-
-		// allLinks.forEach((link) => {
-		// 	//@ts-ignore
-		// 	const arrProps = this.refs[link].props;
-		// 	arrProps.visibilityClass = 'invisible-item';
-		// });
-
-		// const allInputs = this.refs;
-		// Object.values(allInputs).forEach((input) => {
-		// 	//@ts-ignore
-		// 	const arrProps = [input.props];
-		// 	for (let i = 0; i < arrProps.length; i++) {
-		// 		arrProps[i].disabled = false;
-		// 		arrProps[i].activeClass = 'active-input';
-		// 	}
-		// });
 	}
 
 	onChangePassword() {
@@ -87,10 +65,11 @@ class ProfilePage extends Block<ProfilePageProps> {
 	}
 
 	saveInfo() {
-		const formData: any = {};
+		const formData: Record<string, unknown> = {};
 		let errors = false;
 
-		Object.values(this.refs).forEach((ref: any) => {
+		Object.values(this.refs).forEach((ref: Block<BlockProps>) => {
+			// @ts-ignore
 			const inputEl = ref.refs.inputRef.getContent() as HTMLInputElement;
 
 			formData[inputEl.name] = inputEl.value;
@@ -101,6 +80,7 @@ class ProfilePage extends Block<ProfilePageProps> {
 				errors = true;
 			}
 
+			// @ts-ignore
 			ref.refs.errorRef.setProps({
 				errorText: errorText,
 			});

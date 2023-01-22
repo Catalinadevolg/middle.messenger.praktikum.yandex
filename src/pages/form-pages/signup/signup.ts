@@ -1,4 +1,4 @@
-import { Block, CoreRouter, Store } from 'core';
+import { Block, CoreRouter, Store, BlockProps } from 'core';
 import { validateForm, withRouter, withStore } from 'utils';
 import { signup } from 'services';
 
@@ -34,10 +34,11 @@ class SignupPage extends Block<SignupPageProps> {
 	}
 
 	onSignup() {
-		const formData: any = {};
+		const formData: Record<string, unknown> = {};
 		let errors = false;
 
-		Object.values(this.refs).forEach((ref: any) => {
+		Object.values(this.refs).forEach((ref: Block<BlockProps>) => {
+			// @ts-ignore
 			const inputEl = ref.refs.inputRef.getContent() as HTMLInputElement;
 
 			formData[inputEl.name] = inputEl.value;
@@ -48,6 +49,7 @@ class SignupPage extends Block<SignupPageProps> {
 				errors = true;
 			}
 
+			// @ts-ignore
 			ref.refs.errorRef.setProps({
 				errorText: errorText,
 			});
@@ -56,8 +58,6 @@ class SignupPage extends Block<SignupPageProps> {
 		if (errors === false && formData) {
 			this.props.store.dispatch(signup, formData);
 		}
-		console.log(formData);
-		console.log(this.props.store.getState().user);
 	}
 
 	toSignin() {

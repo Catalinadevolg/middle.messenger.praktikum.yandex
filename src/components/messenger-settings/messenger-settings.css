@@ -79,7 +79,7 @@
 	display: flex;
 
 	width: 210px;
-	height: 90px;
+	height: 100px;
 
 	border-radius: 12px;
 	background: var(--white-color);
@@ -94,14 +94,16 @@
 	display: flex;
 	align-items: center;
 
+	margin-top: 16px;
+
 	cursor: pointer;
 
 	font-size: 12px;
 	line-height: 14px;
 }
 
-.chat-menu__row:last-child {
-	margin-top: 16px;
+.chat-menu__row:first-child {
+	margin-top: 0px;
 }
 
 .chat-menu__icon {
