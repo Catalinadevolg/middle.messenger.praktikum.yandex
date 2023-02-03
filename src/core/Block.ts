@@ -1,27 +1,37 @@
-import EventBus from './EventBus';
+import { EventBus } from './EventBus';
 import { nanoid } from 'nanoid';
 import Handlebars from 'handlebars';
+import { isEqual } from 'utils/isEqual';
+
+type Events = Values<typeof Block.EVENTS>;
+
+export type BlockProps = Record<string, unknown>;
+export interface BlockClass<P extends Record<string, unknown>> extends Function {
+	new (props: P): Block<P>;
+	componentName?: string;
+}
 
 // @ts-ignore
-class Block<P extends Record<string, any>> {
+export class Block<P extends BlockProps = BlockProps> {
 	static EVENTS = {
 		INIT: 'init',
 		FLOW_CDM: 'flow:component-did-mount',
 		FLOW_CDU: 'flow:component-did-update',
+		FLOW_CWU: 'flow:component-will-unmount',
 		FLOW_RENDER: 'flow:render',
-	};
+	} as const;
 
 	public id = nanoid(6);
 	protected _element: Nullable<HTMLElement> = null;
-	// @ts-ignore
-	private _meta: { props: P };
 
 	protected props: P;
-	protected children: Record<string, Block<P>>;
-	private eventBus: () => EventBus;
+	protected children: { [id: string]: Block } = {};
+	private eventBus: () => EventBus<Events>;
 
 	protected state: any = {};
-	protected refs: { [key: string]: Block<P> } = {};
+	protected refs: { [key: string]: Block } = {};
+
+	public static componentName?: string;
 
 	/** JSDoc
 	 * @param {string} tagName
@@ -29,23 +39,13 @@ class Block<P extends Record<string, any>> {
 	 *
 	 * @returns {void}
 	 */
-	constructor(propsAndChildren: P = {} as P) {
-		const eventBus = new EventBus();
-
-		const { props, children } = this.getPropsAndChildren(propsAndChildren);
-
-		this.children = children;
-
-		this._meta = {
-			props,
-		};
+	public constructor(props?: P) {
+		const eventBus = new EventBus<Events>();
 
 		this.getStateFromProps(props);
 
-		this.props = this._makePropsProxy(props);
+		this.props = this._makePropsProxy(props || ({} as P));
 		this.state = this._makePropsProxy(this.state);
-
-		this.initChildren();
 
 		this.eventBus = () => eventBus;
 
@@ -53,27 +53,26 @@ class Block<P extends Record<string, any>> {
 		eventBus.emit(Block.EVENTS.INIT);
 	}
 
-	getPropsAndChildren(propsAndChildren: P) {
-		const children: Record<Keys<P>, Block<P>> = {} as Record<Keys<P>, Block<P>>;
-		const props: P = {} as P;
+	/**
+	 * Хелпер, который проверяет, находится ли элемент в DOM дереве
+	 * И есть нет, триггерит событие COMPONENT_WILL_UNMOUNT
+	 */
+	_checkInDom() {
+		const elementInDOM = document.body.contains(this._element);
 
-		(Object.entries(propsAndChildren) as Array<[Keys<P>, any]>).forEach(([key, value]) => {
-			if (value instanceof Block) {
-				children[key] = value;
-			} else {
-				props[key] = value;
-			}
-		});
+		if (elementInDOM) {
+			setTimeout(() => this._checkInDom(), 1000);
+			return;
+		}
 
-		return { props, children };
+		this.eventBus().emit(Block.EVENTS.FLOW_CWU);
 	}
 
-	protected initChildren() {}
-
-	_registerEvents(eventBus: EventBus) {
+	_registerEvents(eventBus: EventBus<Events>) {
 		eventBus.on(Block.EVENTS.INIT, this.init.bind(this));
 		eventBus.on(Block.EVENTS.FLOW_CDM, this._componentDidMount.bind(this));
 		eventBus.on(Block.EVENTS.FLOW_CDU, this._componentDidUpdate.bind(this));
+		eventBus.on(Block.EVENTS.FLOW_CWU, this._componentWillUnmount.bind(this));
 		eventBus.on(Block.EVENTS.FLOW_RENDER, this._render.bind(this));
 	}
 
@@ -81,7 +80,7 @@ class Block<P extends Record<string, any>> {
 		this._element = this._createDocumentElement('div');
 	}
 
-	protected getStateFromProps(_props: P): void {
+	protected getStateFromProps(_props: P | undefined): void {
 		this.state = {};
 	}
 
@@ -90,36 +89,45 @@ class Block<P extends Record<string, any>> {
 		this.eventBus().emit(Block.EVENTS.FLOW_RENDER);
 	}
 
-	_componentDidMount() {
-		this.componentDidMount();
+	_componentDidMount(props: P) {
+		this._checkInDom();
+
+		this.componentDidMount(props);
 	}
 
 	// Может переопределять пользователь, необязательно трогать
-	componentDidMount() {}
+	componentDidMount(_props: P) {}
 
-	dispatchComponentDidMoun() {
-		this.eventBus().emit(Block.EVENTS.FLOW_CDM);
+	_componentWillUnmount() {
+		this.eventBus().destroy();
+		this.componentWillUnmount();
 	}
 
-	_componentDidUpdate(oldProps: any, newProps: any) {
+	componentWillUnmount() {}
+
+	_componentDidUpdate(oldProps: P, newProps: P) {
 		const response = this.componentDidUpdate(oldProps, newProps);
 		if (response) {
-			this.eventBus().emit(Block.EVENTS.FLOW_RENDER);
+			return;
 		}
+
+		this.eventBus().emit(Block.EVENTS.FLOW_RENDER);
 	}
 
 	// Может переопределять пользователь, необязательно трогать
-	componentDidUpdate(_oldProps: any, _newProps: any) {
-		return true;
+	componentDidUpdate(oldProps: P, newProps: P) {
+		return isEqual(oldProps, newProps);
 	}
 
-	setProps = (nextProps: P) => {
+	setProps = (nextProps: Partial<P>) => {
 		if (!nextProps) {
 			return;
 		}
 
 		Object.assign(this.props, nextProps);
 	};
+
+	getProps = () => this.props;
 
 	setState = (nextState: any) => {
 		if (!nextState) {
@@ -136,12 +144,13 @@ class Block<P extends Record<string, any>> {
 	_render() {
 		const templateString = this.render();
 
-		const fragment = this.compile(templateString, { ...this.props });
+		const fragment = this.compile(templateString, { ...this.state, ...this.props });
 
 		const newElement = fragment.firstElementChild as HTMLElement;
 
+		this._removeEvents();
+
 		if (this._element) {
-			this._removeEvents();
 			this._element.replaceWith(newElement);
 		}
 
@@ -169,8 +178,6 @@ class Block<P extends Record<string, any>> {
 	}
 
 	_makePropsProxy(props: P): any {
-		// Можно и так передать this
-		// Такой способ больше не применяется с приходом ES6+
 		const self = this;
 
 		return new Proxy(props as unknown as object, {
@@ -219,24 +226,12 @@ class Block<P extends Record<string, any>> {
 		});
 	}
 
-	// _createDocumentElement(tagName: string): HTMLElement {
-	// 	// Можно сделать метод, который через фрагменты в цикле создаёт сразу несколько блоков
-	// 	return document.createElement(tagName);
-	// }
-
 	compile(templateString: string, context: any): DocumentFragment {
 		const fragment = document.createElement('template');
 
-		Object.entries(this.children).forEach(([key, child]) => {
-			if (Array.isArray(child)) {
-				context[key] = child.map((ch) => `<div data-id="id-${ch.id}"></div>`);
-
-				return;
-			}
-
-			context[key] = `<div data-id="id-${child.id}"></div>`;
-		});
-
+		/**
+		 * Рендерим шаблон
+		 */
 		const template = Handlebars.compile(templateString);
 
 		const htmlString = template({
@@ -246,17 +241,30 @@ class Block<P extends Record<string, any>> {
 		});
 
 		fragment.innerHTML = htmlString;
-
-		Object.entries(this.children).forEach(([_key, child]) => {
-			const stub = fragment.content.querySelector(`[data-id="id-${child.id}"]`);
+		// console.log(fragment);
+		/**
+		 * Заменяем заглушки на компоненты
+		 */
+		Object.entries(this.children).forEach(([id, child]) => {
+			/**
+			 * Ищем заглушку по id
+			 */
+			const stub = fragment.content.querySelector(`[data-id="id-${id}"]`);
 
 			if (!stub) {
 				return;
 			}
 
-			stub.replaceWith(child.getContent()!);
+			/**
+			 * Заменяем заглушку на component._element
+			 */
+			const content = child.getContent();
+			stub.replaceWith(content);
 		});
 
+		/**
+		 * Возвращаем фрагмент
+		 */
 		return fragment.content;
 	}
 
@@ -268,5 +276,3 @@ class Block<P extends Record<string, any>> {
 		this.getContent()!.style.display = 'none';
 	}
 }
-
-export default Block;

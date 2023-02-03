@@ -80,50 +80,7 @@
 	margin: auto;
 }
 
-.profile__avatar {
-	position: relative;
-	overflow: hidden;
-
-	max-width: 130px;
-	max-height: 130px;
-	margin: 0 auto;
-
-	cursor: pointer;
-
-	border-radius: 50%;
-}
-
-.profile__avatar img {
-	max-width: 130px;
-	max-height: 130px;
-	object-fit: cover;
-}
-
-.avatar__text {
-	height: 100%;
-	width: 100%;
-	position: absolute;
-	top: 0;
-	left: 0;
-
-	font-size: 13px;
-	line-height: 130px;
-
-	color: #ffffff;
-	background: rgba(0, 0, 0, 0.5);
-
-	visibility: hidden;
-	opacity: 0;
-
-	transition: opacity 0.2s, visibility 0.2s;
-}
-
-.profile__avatar:hover .avatar__text {
-	visibility: visible;
-	opacity: 1;
-}
-
-.profile__name {
+.profile__id {
 	margin: 20px auto;
 	margin-bottom: 10px;
 
@@ -132,7 +89,7 @@
 	line-height: 16px;
 }
 
-.profile__name-hidden {
+.profile__id-hidden {
 	height: 46px;
 }
 
@@ -183,21 +140,36 @@
 	display: none;
 }
 
+.invisible-item {
+	display: none;
+}
+
 .blue-link {
 	color: var(--link-blue-color);
+	background: none;
 }
 
 .red-link {
 	color: var(--red-color);
+	background: none;
 }
 
-.profile__button {
+.profile__buttons {
 	display: flex;
+	flex-direction: column;
 
 	margin-top: 31px;
 	margin-bottom: 31px;
 }
 
+.empty-box {
+	height: 23px;
+}
+
 .active-input {
 	color: var(--main-text-color);
+}
+
+.centered {
+	margin: auto;
 }

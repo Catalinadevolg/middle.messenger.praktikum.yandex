@@ -1,1 +1,1 @@
-export { ChatListItem as default } from './chat-list-item';
+export { ChatListItem } from './chat-list-item';

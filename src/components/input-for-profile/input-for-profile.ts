@@ -1,6 +1,6 @@
-import Block from '../../core/Block';
+import { Block, BlockProps } from 'core';
 
-interface InputForProfileProps {
+type InputForProfileProps = BlockProps & {
 	type?: 'text' | 'password';
 	name: string;
 	placeholder?: string;
@@ -10,7 +10,7 @@ interface InputForProfileProps {
 	onInput?: () => void;
 	onFocus?: () => void;
 	onBlur?: () => void;
-}
+};
 export class InputForProfile extends Block<InputForProfileProps> {
 	static componentName = 'InputForProfile';
 

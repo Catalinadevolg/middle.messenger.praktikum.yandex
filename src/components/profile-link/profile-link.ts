@@ -1,27 +1,22 @@
-import Block from 'core/Block';
+import { Block, BlockProps } from 'core';
 
-interface ProfileLinkProps {
-	link: string;
+type ProfileLinkProps = BlockProps & {
 	className: string;
 	text: string;
-	onClick: () => void;
-}
+	addClassName?: string;
+	onClick?: () => void;
+};
 export class ProfileLink extends Block<ProfileLinkProps> {
 	static componentName = 'ProfileLink';
 
 	constructor({ onClick, ...props }: ProfileLinkProps) {
-		super({
-			...props,
-			events: {
-				click: onClick,
-			},
-		});
+		super({ ...props, events: { click: onClick } });
 	}
 
 	render(): string {
 		return `
-			<div class="profile__link">
-				<a href="{{link}}" class="{{className}}">{{text}}</a>
+			<div class="profile__link {{#if visibilityClass}}{{visibilityClass}}{{/if}} {{addClassName}}">
+				<button class="{{className}}" type="button">{{text}}</button>
 			</div>
 		`;
 	}

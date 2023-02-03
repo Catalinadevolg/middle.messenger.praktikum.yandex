@@ -1,129 +1,89 @@
-import Block from 'core/Block';
+import { Block, CoreRouter, Store } from 'core';
+import { withRouter, withStore } from 'utils';
+import { getChats } from 'services';
 
 import defaultAvatar from 'assets/empty-avatar.png';
 
-interface MessengerPageProps {}
+type MessengerPageProps = {
+	router: CoreRouter;
+	store: Store<AppState>;
+	toProfile?: () => void;
+	openModalWindow?: () => void;
+};
 
-export default class MessengerPage extends Block<MessengerPageProps> {
-	constructor() {
-		super();
+class MessengerPage extends Block<MessengerPageProps> {
+	static componentName = 'MessengerPage';
+
+	constructor(props: MessengerPageProps) {
+		super(props);
 
 		this.setProps({
-			listItems: [
-				{
-					userName: 'Игорь',
-					userAvatar: defaultAvatar,
-					lastMessage: 'Some text',
-					lastMessageDate: new Date().toLocaleTimeString(),
-					newMessagesCount: 2,
-				},
-				{
-					userName: 'Петя',
-					userAvatar: defaultAvatar,
-					lastMessage: 'Some text',
-					lastMessageDate: new Date().toLocaleDateString(),
-					active: true,
-				},
-				{
-					userName: 'Игорь',
-					userAvatar: defaultAvatar,
-					lastMessage: 'Some text',
-					lastMessageDate: new Date().toLocaleTimeString(),
-					newMessagesCount: 2,
-				},
-				{
-					userName: 'Игорь',
-					userAvatar: defaultAvatar,
-					lastMessage: 'Some text',
-					lastMessageDate: new Date().toLocaleTimeString(),
-					newMessagesCount: 2,
-				},
-				{
-					userName: 'Игорь',
-					userAvatar: defaultAvatar,
-					lastMessage: 'Some text',
-					lastMessageDate: new Date().toLocaleTimeString(),
-					newMessagesCount: 2,
-				},
-				{
-					userName: 'Игорь',
-					userAvatar: defaultAvatar,
-					lastMessage: 'Some text',
-					lastMessageDate: new Date().toLocaleTimeString(),
-					newMessagesCount: 2,
-				},
-				{
-					userName: 'Игорь',
-					userAvatar: defaultAvatar,
-					lastMessage: 'Some text',
-					lastMessageDate: new Date().toLocaleTimeString(),
-					newMessagesCount: 2,
-				},
-				{
-					userName: 'Игорь',
-					userAvatar: defaultAvatar,
-					lastMessage: 'Some text',
-					lastMessageDate: new Date().toLocaleTimeString(),
-					newMessagesCount: 2,
-				},
-				{
-					userName: 'Игорь',
-					userAvatar: defaultAvatar,
-					lastMessage: 'Some text',
-					lastMessageDate: new Date().toLocaleTimeString(),
-					newMessagesCount: 2,
-				},
-			],
-			activeChat: 1,
+			toProfile: () => this.toProfile(),
+			openModalWindow: () => this.openModalWindow(),
 		});
 	}
 
+	async componentDidMount() {
+		console.log('Загружаем чаты');
+		if (!this.props.store.getState().chats) {
+			await this.props.store.dispatch(getChats);
+		}
+	}
+
+	toProfile() {
+		this.props.router.go('/profile');
+	}
+
+	openModalWindow() {
+		// @ts-ignore
+		this.refs.createChatModal.props.modalClassName = '_active';
+	}
+
 	render() {
+		const state = this.props.store.getState();
+
 		return `
 			<main class="messenger">
 				<div class="chat-list">
 					<div class="chat-list__header">
 						<div class="chat-list__profile-link">
-							<a href="profile.html" class="profile-link">Профиль</a>
+							{{{Link
+								linkClass="profile-link"
+								text="Профиль"
+								onClick=toProfile
+							}}}
 						</div>
+						{{{Button
+							buttonClass="button-wrapper"
+							textClass="button"
+							type="button"
+							text='Создать новый чат'
+							onClick=openModalWindow
+						}}}
 						<div class="chat-list__search">
 							<input type="search" name="search" placeholder="Поиск" class="search__input">
 						</div>
 					</div>
-					<div class="chat-list__list">
-						{{#each listItems}}
-							{{#if active }}
-								{{{ChatListItem
-									className='item_active'
-									userName=this.userName
-									userAvatar=this.userAvatar
-									lastMessage=this.lastMessage
-									lastMessageDate=this.lastMessageDate
-									newMessagesCount=this.newMessagesCount
-								}}}
-							{{else}}
-								{{{ChatListItem
-									userName=this.userName
-									userAvatar=this.userAvatar
-									lastMessage=this.lastMessage
-									lastMessageDate=this.lastMessageDate
-									newMessagesCount=this.newMessagesCount
-								}}}
-							{{/if}}
-						{{/each}}
-						<div class="chat-list__line"></div>
-					</div>
+					{{{ChatList}}}
 				</div>
-				{{#if activeChat }}
+				${
+					state.activeChat
+						? `
 					{{{ChatBoxItem
-						activeChat=this.activeChat
-						userAvatar='${defaultAvatar}'
-						userName='Петя'
+						userAvatar="${state.activeChat.avatar ? state.activeChat.avatar : defaultAvatar}"
+						userName="${state.activeChat.title}"
 					}}}
-				{{else}}
-					{{{ ChatPlug }}}
-				{{/if}}
+				`
+						: `{{{ ChatPlug }}}`
+				}
+				{{{CreateChatModal
+					ref="createChatModal"
+				}}}
 			</main>
 		`;
 	}
 }
+
+const ComposedMessenger = withRouter(withStore(MessengerPage));
+
+export { ComposedMessenger as MessengerPage };

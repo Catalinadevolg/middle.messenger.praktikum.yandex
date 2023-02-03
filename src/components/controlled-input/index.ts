@@ -1,1 +1,1 @@
-export { ControlledInput as default } from './controlled-input';
+export { ControlledInput } from './controlled-input';

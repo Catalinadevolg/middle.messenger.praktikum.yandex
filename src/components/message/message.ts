@@ -1,10 +1,10 @@
-import Block from 'core/Block';
+import { Block, BlockProps } from 'core';
 
-interface MessageProps {
+type MessageProps = BlockProps & {
 	direction: string;
 	message: string;
 	time: Date;
-}
+};
 export class Message extends Block<MessageProps> {
 	static componentName = 'Message';
 

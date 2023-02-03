@@ -1,12 +1,12 @@
-import Block from 'core/Block';
+import { Block, BlockProps } from 'core';
 
-interface ButtonProps {
+type ButtonProps = BlockProps & {
 	buttonClass?: string;
 	textClass?: string;
-	text: string;
+	text?: string;
 	type?: 'submit' | 'button';
 	onClick?: () => void;
-}
+};
 export class Button extends Block<ButtonProps> {
 	static componentName = 'Button';
 
@@ -14,10 +14,10 @@ export class Button extends Block<ButtonProps> {
 		super({ ...props, events: { click: onClick } });
 	}
 
-	render() {
+	render(): string {
 		return `
-		<button class="{{buttonClass}}" type={{type}}>
-			<div class="{{textClass}}">{{text}}</div>
+		<button class="{{buttonClass}}" type="{{type}}">
+			{{#if text}}<div class="{{textClass}}">{{text}}</div>{{/if}}
 		</button>
 		`;
 	}

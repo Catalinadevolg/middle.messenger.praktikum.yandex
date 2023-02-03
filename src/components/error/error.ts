@@ -1,9 +1,9 @@
-import Block from 'core/Block';
+import { Block, BlockProps } from 'core';
 
-interface ErrorProps {
+type ErrorProps = BlockProps & {
 	errorClass?: string;
 	errorText?: string;
-}
+};
 export class Error extends Block<ErrorProps> {
 	static componentName = 'Error';
 
