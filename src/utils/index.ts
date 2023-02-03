@@ -12,3 +12,4 @@ export { queryStringify } from './querystringify';
 export { validateForm } from './validateForm';
 export { withRouter } from './withRouter';
 export { withStore } from './withStore';
+export { sleep } from './sleep';

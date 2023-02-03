@@ -3,9 +3,10 @@
 	"version": "1.0.0",
 	"description": "",
 	"scripts": {
-		"dev": "parcel src/index.html --port 3000 --no-cache",
-		"build": "parcel build src/index.html --no-cache --public-url ./",
-		"test": "echo \"Error: no test specified\" && exit 1",
+		"dev": "NODE_ENV=development webpack serve",
+		"build": "NODE_ENV=production webpack",
+		"clear": "rd /s /q dist",
+		"test": "jest",
 		"start": "npm run build && node ./server.js",
 		"lint": "eslint --fix --ext .js,.ts ./src",
 		"stylelint": "stylelint \"**/*.css\" --fix",
@@ -16,11 +17,11 @@
 		"components": "./src/components",
 		"pages": "./src/pages",
 		"assets": "./src/assets",
-		"helpers": "./src/helpers",
 		"styles": "./src/styles",
 		"api": "./src/api",
 		"utils": "./src/utils",
-		"services": "./src/services"
+		"services": "./src/services",
+		"tests": "./src/tests"
 	},
 	"prettier": {
 		"singleQuote": true,
@@ -33,26 +34,67 @@
 	"author": "",
 	"license": "ISC",
 	"devDependencies": {
-		"@anikin/parcel-transformer-handlebars": "1.0.2",
-		"@anikin/parcel-transformer-handlebars-precompile": "1.0.1",
+		"@babel/core": "7.20.12",
+		"@babel/preset-env": "7.20.2",
+		"@babel/preset-typescript": "7.18.6",
+		"@testing-library/dom": "8.20.0",
+		"@testing-library/jest-dom": "5.16.5",
+		"@types/jest": "27.5.2",
 		"@types/node": "18.11.17",
 		"@typescript-eslint/eslint-plugin": "5.46.1",
 		"@typescript-eslint/parser": "5.46.1",
+		"copy-webpack-plugin": "11.0.0",
+		"css-loader": "6.7.3",
+		"css-minimizer-webpack-plugin": "4.2.2",
+		"dotenv": "16.0.3",
 		"eslint": "8.29.0",
 		"eslint-config-prettier": "8.5.0",
 		"eslint-plugin-import": "2.26.0",
 		"eslint-plugin-prettier": "4.2.1",
-		"parcel": "2.8.2",
+		"html-webpack-plugin": "5.5.0",
+		"identity-obj-proxy": "3.0.0",
+		"jest": "27.5.1",
+		"mini-css-extract-plugin": "2.7.2",
+		"msw": "0.39.2",
 		"postcss": "8.4.19",
 		"postcss-import": "15.0.0",
 		"prettier": "2.8.1",
+		"style-loader": "3.3.1",
 		"stylelint": "14.16.0",
 		"stylelint-config-prettier": "9.0.4",
-		"typescript": "4.9.4"
+		"ts-loader": "9.4.2",
+		"typescript": "4.9.4",
+		"webpack": "5.75.0",
+		"webpack-bundle-analyzer": "4.7.0",
+		"webpack-cli": "5.0.1",
+		"webpack-dev-server": "4.11.1",
+		"webpack-merge": "5.8.0"
 	},
 	"dependencies": {
 		"express": "4.18.2",
 		"handlebars": "4.7.7",
-		"nanoid": "4.0.0"
+		"nanoid": "3.3.1"
+	},
+	"jest": {
+		"testEnvironment": "jsdom",
+		"setupFiles": [
+			"<rootDir>/src/tests/setupEnv.ts"
+		],
+		"setupFilesAfterEnv": [
+			"<rootDir>/src/tests/setup.ts"
+		],
+		"moduleNameMapper": {
+			"\\.(png|webp)$": "<rootDir>/src/tests/fileMock.ts",
+			"\\.(css|jpeg|jpg)$": "identity-obj-proxy",
+			"^core(.*)$": "<rootDir>/src/core$1",
+			"^components(.*)$": "<rootDir>/src/components$1",
+			"^pages(.*)$": "<rootDir>/src/pages$1",
+			"^assets(.*)$": "<rootDir>/src/assets$1",
+			"^styles(.*)$": "<rootDir>/src/styles$1",
+			"^api(.*)$": "<rootDir>/src/api$1",
+			"^utils(.*)$": "<rootDir>/src/utils$1",
+			"^services(.*)$": "<rootDir>/src/services$1",
+			"^tests(.*)$": "<rootDir>/src/tests$1"
+		}
 	}
 }

@@ -7,7 +7,7 @@ export { ControlledInput } from './controlled-input';
 export { Error } from './error';
 export { Input } from './input';
 export { InputForProfile } from './input-for-profile';
-export { Layout } from './layout';
+export { Loader } from './loader';
 export { Link } from './link';
 export { Message } from './message';
 export { MessengerSettings, BubbleMessenger, UserListItem } from './messenger-settings';

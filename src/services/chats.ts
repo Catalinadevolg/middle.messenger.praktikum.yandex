@@ -2,6 +2,7 @@ import type { Dispatch } from 'core';
 import { DispatchStateHandler } from './types';
 import { ChatDTO, chatsAPI, UserDTO } from 'api';
 import { apiHasError, transformChat, transformUser, transformChatId } from 'utils';
+import Socket from 'services/socket';
 
 type NewChatPayload = {
 	title: string;
@@ -42,7 +43,11 @@ export const getChats = async (dispatch: Dispatch<AppState>) => {
 	}
 };
 
-export const createChat: DispatchStateHandler<NewChatPayload> = async (dispatch, state, action) => {
+export const createChat: DispatchStateHandler<NewChatPayload> = async (
+	dispatch,
+	_state,
+	action
+) => {
 	dispatch({ isLoading: true });
 
 	try {
@@ -79,6 +84,11 @@ export const createChat: DispatchStateHandler<NewChatPayload> = async (dispatch,
 				createdBy: createdBy,
 			},
 		});
+
+		// Подключаемся к Socket
+		const chatID = transformChatId(response as { id: number }).id;
+		const userID = window.store.getState().user?.id;
+		Socket.connect(userID!, chatID!);
 	} catch (err) {
 		dispatch({ isLoading: false });
 		if (err instanceof ProgressEvent) {
@@ -88,12 +98,11 @@ export const createChat: DispatchStateHandler<NewChatPayload> = async (dispatch,
 	}
 };
 
-export const deleteChat: DispatchStateHandler<number> = async (dispatch, state, action) => {
+export const deleteChat: DispatchStateHandler<number> = async (dispatch, _state, action) => {
 	dispatch({ isLoading: true });
 
 	try {
 		const response = await chatsAPI.deleteChat(action);
-		console.log(response);
 
 		if (apiHasError(response)) {
 			dispatch({ isLoading: false, loginFormError: response.reason });
@@ -127,7 +136,7 @@ export const deleteChat: DispatchStateHandler<number> = async (dispatch, state, 
 	}
 };
 
-export const getChatUsers: DispatchStateHandler<number> = async (dispatch, state, action) => {
+export const getChatUsers: DispatchStateHandler<number> = async (dispatch, _state, action) => {
 	try {
 		const response = await chatsAPI.getChatUsers(action);
 
@@ -155,7 +164,7 @@ export const getChatUsers: DispatchStateHandler<number> = async (dispatch, state
 
 export const addUser: DispatchStateHandler<ActionWithUserPayload> = async (
 	dispatch,
-	state,
+	_state,
 	action
 ) => {
 	dispatch({ isLoading: true });
@@ -196,7 +205,7 @@ export const addUser: DispatchStateHandler<ActionWithUserPayload> = async (
 
 export const deleteUser: DispatchStateHandler<ActionWithUserPayload> = async (
 	dispatch,
-	state,
+	_state,
 	action
 ) => {
 	dispatch({ isLoading: true });

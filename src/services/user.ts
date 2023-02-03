@@ -17,25 +17,16 @@ type PasswordPayload = {
 	newPassword: string;
 };
 
-export const changeAvatar: DispatchStateHandler<File> = async (dispatch, state, action) => {
+export const changeAvatar: DispatchStateHandler<File> = async (dispatch, _state, action) => {
 	dispatch({ isLoading: true });
 
 	try {
 		const response = await userAPI.changeAvatar(action);
-		console.log(response);
+
 		if (apiHasError(response)) {
 			dispatch({ isLoading: false, loginFormError: response.reason });
 			return;
 		}
-
-		// const responseUser = await authAPI.me();
-		// console.log(responseUser);
-		// dispatch({ isLoading: false, loginFormError: null });
-
-		// if (apiHasError(responseUser)) {
-		// 	dispatch(logout);
-		// 	return;
-		// }
 
 		dispatch({ isLoading: false, user: transformUser(response as UserDTO) });
 	} catch (err) {
@@ -47,7 +38,7 @@ export const changeAvatar: DispatchStateHandler<File> = async (dispatch, state, 
 	}
 };
 
-export const changeInfo: DispatchStateHandler<UserPayload> = async (dispatch, state, action) => {
+export const changeInfo: DispatchStateHandler<UserPayload> = async (dispatch, _state, action) => {
 	dispatch({ isLoading: true });
 
 	try {
@@ -79,7 +70,7 @@ export const changeInfo: DispatchStateHandler<UserPayload> = async (dispatch, st
 
 export const changePassword: DispatchStateHandler<PasswordPayload> = async (
 	dispatch,
-	state,
+	_state,
 	action
 ) => {
 	dispatch({ isLoading: true });

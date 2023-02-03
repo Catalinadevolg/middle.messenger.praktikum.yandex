@@ -1,8 +1,8 @@
-import { Block, BlockProps, Store } from 'core';
+import { Block, Store } from 'core';
 import { validateForm, withStore } from 'utils';
-import { addUser, deleteUser, getChatUsers, deleteChat } from 'services';
+import { addUser, deleteUser, deleteChat } from 'services';
 
-type BubbleMessengerProps = BlockProps & {
+type BubbleMessengerProps = Partial<AppState> & {
 	store: Store<AppState>;
 	activeBubble: string;
 	activeModal: string;
@@ -35,37 +35,53 @@ class BubbleMessenger extends Block<BubbleMessengerProps> {
 	}
 
 	deleteChat() {
-		const chatId = this.props.store.getState().activeChat?.id;
-		this.props.store.dispatch(deleteChat, { chatId });
+		const chatId = this.props.activeChat?.id;
+		window.store.dispatch(deleteChat, { chatId });
 	}
 
 	openModalAddUser() {
-		this.props.modalStatus = 'add';
+		if (this.props.modalStatus !== 'add') {
+			this.setProps({
+				modalStatus: 'add',
+			});
+		}
 
 		if (!this.props.activeModal) {
-			this.props.activeModal = '_active';
-			this.props.activeBubble = '';
+			this.setProps({
+				activeModal: '_active',
+				activeBubble: '',
+			});
 		} else {
-			this.props.activeModal = '';
+			this.setProps({
+				activeModal: '',
+			});
 		}
 	}
 
 	openModalDeleteUser() {
-		this.props.modalStatus = 'remove';
+		if (this.props.modalStatus !== 'remove') {
+			this.setProps({
+				modalStatus: 'remove',
+			});
+		}
 
 		if (!this.props.activeModal) {
-			this.props.activeModal = '_active';
-			this.props.activeBubble = '';
+			this.setProps({
+				activeModal: '_active',
+				activeBubble: '',
+			});
 		} else {
-			this.props.activeModal = '';
+			this.setProps({
+				activeModal: '',
+			});
 		}
 	}
 
 	addUser() {
 		console.log('Добавляем пользователя');
 		let errors = false;
-		// @ts-ignore
-		const inputRefs = this.refs.inputRef.refs;
+
+		const inputRefs = this.refs.inputRef.getRefs();
 
 		const inputEl = inputRefs.inputRef.getContent() as HTMLInputElement;
 		const userId = inputEl.value;
@@ -82,27 +98,29 @@ class BubbleMessenger extends Block<BubbleMessengerProps> {
 
 		if (errors === false && userId) {
 			// Проверяем по Id, состоит ли пользователь в чате
-			const users = this.props.store.getState().users;
-			const index = users!.findIndex((user) => user.id === +userId);
+			const users = this.props.users;
+			if (users) {
+				const index = users!.findIndex((user) => user.id === +userId);
 
-			// Если состоит, выводим ошибку
-			if (index !== -1) {
-				inputRefs.errorRef.setProps({
-					errorText: 'Пользователь уже в чате',
-				});
-				return;
-			}
+				// Если состоит, выводим ошибку
+				if (index !== -1) {
+					inputRefs.errorRef.setProps({
+						errorText: 'Пользователь уже в чате',
+					});
+					return;
+				}
 
-			// Если не состоит, добавляем в чат
-			if (index === -1) {
-				const chatId = this.props.store.getState().activeChat?.id;
+				// Если не состоит, добавляем в чат
+				if (index === -1) {
+					const chatId = this.props.activeChat?.id;
 
-				const data = {
-					chatId,
-					users: [userId],
-				};
+					const data = {
+						chatId,
+						users: [userId],
+					};
 
-				this.props.store.dispatch(addUser, data);
+					window.store.dispatch(addUser, data);
+				}
 			}
 		}
 	}
@@ -115,23 +133,24 @@ class BubbleMessenger extends Block<BubbleMessengerProps> {
 		// e.target может быть на внешнем div
 		const userDataId = target.getAttribute('data-id');
 		const userId = userDataId!.split('-')[1];
-		const chatId = this.props.store.getState().activeChat?.id;
+		const chatId = this.props.activeChat?.id;
 
 		const data = {
 			chatId,
 			users: [userId],
 		};
 
-		this.props.store.dispatch(deleteUser, data);
+		window.store.dispatch(deleteUser, data);
 	}
 
 	cancelСlick() {
-		this.props.activeModal = '';
+		this.setProps({
+			activeModal: '',
+		});
 	}
 
 	render(): string {
-		const state = this.props.store.getState();
-		const users = state.users;
+		const users = this.props.users;
 
 		return `
 		<div>
@@ -155,7 +174,7 @@ class BubbleMessenger extends Block<BubbleMessengerProps> {
 							}}}
 						</div>
 						${
-							state.user!.id === state.activeChat?.createdBy
+							this.props.user!.id === this.props.activeChat?.createdBy
 								? `<div class="chat-menu__row">
 								<div class="chat-menu__icon icon-delete"></div>
 								{{{Link
@@ -224,6 +243,26 @@ class BubbleMessenger extends Block<BubbleMessengerProps> {
 	}
 }
 
-const ComposedBubbleMessenger = withStore(BubbleMessenger);
+const ComposedBubbleMessenger = withStore<
+	BubbleMessengerProps,
+	{
+		loginFormError: Nullable<string>;
+		isLoading: boolean;
+		activeChat: {
+			id: Nullable<number>;
+			title: Nullable<string>;
+			avatar: Nullable<string>;
+			createdBy: Nullable<number>;
+		} | null;
+		users: Nullable<User[]>;
+		user: Nullable<User>;
+	}
+>(BubbleMessenger, (state: AppState) => ({
+	isLoading: state.isLoading,
+	loginFormError: state.loginFormError,
+	activeChat: state.activeChat,
+	users: state.users,
+	user: state.user,
+}));
 
 export { ComposedBubbleMessenger as BubbleMessenger };

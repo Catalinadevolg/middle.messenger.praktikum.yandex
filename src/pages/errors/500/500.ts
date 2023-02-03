@@ -18,8 +18,12 @@ class Error500Page extends Block<Error500PageProps> {
 		});
 	}
 
+	componentDidUpdate() {
+		return window.store.getState().screen === 'error404';
+	}
+
 	toMessenger() {
-		this.props.router.go('/messenger');
+		this.props.router.go('/error500');
 	}
 
 	render() {
@@ -37,6 +41,14 @@ class Error500Page extends Block<Error500PageProps> {
 	}
 }
 
-const ComposedError500 = withRouter(withStore(Error500Page));
+const ComposedError500 = withRouter(
+	withStore<Error500PageProps, { appIsInited: boolean; screen: AppState }>(
+		Error500Page,
+		(state: AppState) => ({
+			appIsInited: state.appIsInited,
+			screen: state.screen,
+		})
+	)
+);
 
 export { ComposedError500 as Error500Page };

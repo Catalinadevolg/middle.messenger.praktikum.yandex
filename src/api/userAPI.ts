@@ -18,7 +18,6 @@ type PasswordRequestData = {
 const options = {
 	headers: {
 		Accept: 'application/json',
-		'Content-Type': 'application/json',
 	},
 };
 

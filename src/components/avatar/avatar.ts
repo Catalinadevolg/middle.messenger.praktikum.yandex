@@ -37,31 +37,39 @@ class Avatar extends Block<AvatarProps> {
 	chooseNewAvatar() {
 		const input = document.querySelector('.hidden-input') as HTMLInputElement;
 		const file = input.files![0];
-		this.props.file = file;
+		this.setProps({
+			file: file,
+		});
 
 		if (file) {
-			this.props.modalClassName = 'avatar__modal_active';
 			const src = URL.createObjectURL(file);
-			this.props.selectedAvatar = src;
+			this.setProps({
+				modalClassName: 'avatar__modal_active',
+				selectedAvatar: src,
+			});
 		}
 	}
 
 	changeAvatar() {
 		const file = this.props.file;
 
-		this.props.store.dispatch(changeAvatar, file);
-		this.props.modalClassName = '';
+		window.store.dispatch(changeAvatar, file);
+		this.setProps({
+			modalClassName: '',
+		});
 	}
 
 	cancelingChange() {
-		this.props.modalClassName = '';
+		this.setProps({
+			modalClassName: '',
+		});
 	}
 
 	render() {
-		const user = this.props.store.getState().user;
+		const user = this.props.user;
 
 		return `
-		<div class="profile__avatar">
+		<div class="profile__avatar" data-testid="avatar">
 			<label class="avatar__label">
 				{{{Input
 					type="file"
@@ -104,6 +112,11 @@ class Avatar extends Block<AvatarProps> {
 	}
 }
 
-const ComposedProfile = withStore(Avatar);
+const ComposedAvatar = withStore<AvatarProps, { user: Nullable<User> }>(
+	Avatar,
+	(state: AppState) => ({
+		user: state.user,
+	})
+);
 
-export { ComposedProfile as Avatar };
+export { ComposedAvatar as Avatar };

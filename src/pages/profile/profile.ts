@@ -2,15 +2,14 @@ import { Block, CoreRouter, Store, BlockProps } from 'core';
 import { validateForm, withRouter, withStore } from 'utils';
 import { changeInfo, logout } from 'services';
 
-type ProfilePageProps = {
+type ProfilePageProps = Partial<AppState> & {
 	router: CoreRouter;
 	store: Store<AppState>;
-	user: User | null;
-	toChats: () => void;
+	toChats?: () => void;
 	changeInfo?: () => void;
 	onChangePassword?: () => void;
 	onSignin?: () => void;
-	deactivatedChange: boolean;
+	deactivatedChange?: boolean;
 	saveInfo?: () => void;
 	cancelChangeInfo?: () => void;
 };
@@ -30,6 +29,10 @@ class ProfilePage extends Block<ProfilePageProps> {
 		});
 	}
 
+	componentDidUpdate() {
+		return window.store.getState().screen === 'profile';
+	}
+
 	toChats() {
 		this.props.router.go('/messenger');
 	}
@@ -41,13 +44,15 @@ class ProfilePage extends Block<ProfilePageProps> {
 			allInputs.push(key);
 		}
 
-		this.props.deactivatedChange = false;
+		this.setProps({
+			deactivatedChange: false,
+		});
 
 		allInputs.forEach((input) => {
-			//@ts-ignore
-			const arrProps = this.refs[input].props;
-			arrProps.disabled = false;
-			arrProps.activeClass = 'active-input';
+			this.refs[input].setProps({
+				disabled: false,
+				activeClass: 'active-input',
+			});
 		});
 	}
 
@@ -55,13 +60,12 @@ class ProfilePage extends Block<ProfilePageProps> {
 		this.props.router.go('/password');
 	}
 	onSignin() {
-		this.props.store.dispatch({
-			appIsInited: false,
+		window.store.dispatch({
 			isLoading: false,
 			loginFormError: null,
 			user: null,
 		});
-		this.props.store.dispatch(logout);
+		window.store.dispatch(logout);
 	}
 
 	saveInfo() {
@@ -69,8 +73,7 @@ class ProfilePage extends Block<ProfilePageProps> {
 		let errors = false;
 
 		Object.values(this.refs).forEach((ref: Block<BlockProps>) => {
-			// @ts-ignore
-			const inputEl = ref.refs.inputRef.getContent() as HTMLInputElement;
+			const inputEl = ref.getRefs().inputRef.getContent() as HTMLInputElement;
 
 			formData[inputEl.name] = inputEl.value;
 
@@ -80,52 +83,46 @@ class ProfilePage extends Block<ProfilePageProps> {
 				errors = true;
 			}
 
-			// @ts-ignore
-			ref.refs.errorRef.setProps({
+			ref.getRefs().errorRef.setProps({
 				errorText: errorText,
 			});
 		});
 
 		if (errors === false && formData) {
-			this.props.store.dispatch(changeInfo, formData);
-
-			const allInputs = [];
+			window.store.dispatch(changeInfo, formData);
 
 			for (const key in this.refs) {
-				allInputs.push(key);
+				this.refs[key].setProps({
+					disabled: true,
+					activeClass: '',
+				});
 			}
-			allInputs.forEach((input) => {
-				//@ts-ignore
-				const arrProps = this.refs[input].props;
-				arrProps.disabled = true;
-				arrProps.activeClass = '';
-			});
 
-			this.props.deactivatedChange = true;
+			this.setProps({
+				deactivatedChange: true,
+			});
 		}
 	}
 
 	cancelChangeInfo() {
-		const allInputs = [];
-
 		for (const key in this.refs) {
-			allInputs.push(key);
+			this.refs[key].setProps({
+				disabled: true,
+				activeClass: '',
+			});
 		}
-		allInputs.forEach((input) => {
-			//@ts-ignore
-			const arrProps = this.refs[input].props;
-			arrProps.disabled = true;
-			arrProps.activeClass = '';
-		});
 
-		this.props.deactivatedChange = true;
+		this.setProps({
+			deactivatedChange: true,
+		});
 	}
 
 	render() {
-		const user = this.props.store.getState().user;
+		const user = this.props.user;
 
 		return `
-			<div class="profile__container">
+			<div class="profile__container" data-testid="profile-screen">
+				{{{Loader}}}
 				<div class="profile__back-btn">
 					{{{Button
 						buttonClass="back-btn"
@@ -213,11 +210,13 @@ class ProfilePage extends Block<ProfilePageProps> {
 								className="blue-link"
 								text="Изменить пароль"
 								onClick=onChangePassword
+								dataTestId="to-password-btn"
 							}}}
 							{{{ProfileLink
 								className="red-link"
 								text="Выйти"
 								onClick=onSignin
+								dataTestId="logout-btn"
 							}}}
 						{{else}}
 							{{{Button
@@ -240,6 +239,15 @@ class ProfilePage extends Block<ProfilePageProps> {
 	}
 }
 
-const ComposedProfile = withRouter(withStore(ProfilePage));
+const ComposedProfile = withRouter(
+	withStore<ProfilePageProps, { user: Nullable<User>; appIsInited: boolean; screen: AppState }>(
+		ProfilePage,
+		(state: AppState) => ({
+			appIsInited: state.appIsInited,
+			screen: state.screen,
+			user: state.user,
+		})
+	)
+);
 
 export { ComposedProfile as ProfilePage };

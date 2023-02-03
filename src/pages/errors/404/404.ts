@@ -18,6 +18,10 @@ class Error404Page extends Block<Error404PageProps> {
 		});
 	}
 
+	componentDidUpdate() {
+		return window.store.getState().screen === 'error404';
+	}
+
 	toMessenger() {
 		this.props.router.go('/messenger');
 	}
@@ -37,6 +41,14 @@ class Error404Page extends Block<Error404PageProps> {
 	}
 }
 
-const ComposedError404 = withRouter(withStore(Error404Page));
+const ComposedError404 = withRouter(
+	withStore<Error404PageProps, { appIsInited: boolean; screen: AppState }>(
+		Error404Page,
+		(state: AppState) => ({
+			appIsInited: state.appIsInited,
+			screen: state.screen,
+		})
+	)
+);
 
 export { ComposedError404 as Error404Page };
