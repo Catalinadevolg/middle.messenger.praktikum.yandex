@@ -9,7 +9,7 @@ interface BlockConstructable<Props = any> {
 export function registerComponent<Props extends any>(Component: BlockConstructable<Props>) {
 	Handlebars.registerHelper(
 		Component.componentName || Component.name,
-		function (this: Props, { hash: { ref, ...hash }, data }: HelperOptions) {
+		function (this: Props, { hash: { ref, ...hash }, data, fn }: HelperOptions) {
 			if (!data.root.children) {
 				data.root.children = {};
 			}
@@ -38,7 +38,9 @@ export function registerComponent<Props extends any>(Component: BlockConstructab
 				refs[ref] = component;
 			}
 
-			return `<div data-id="id-${component.id}"></div>`;
+			const contents = fn ? fn(this) : '';
+
+			return `<div data-id="${component.id}">${contents}</div>`;
 		}
 	);
 }

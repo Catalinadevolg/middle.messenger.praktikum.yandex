@@ -101,4 +101,13 @@ class OnBoardingPage extends Block<OnBoardingPageProps> {
 	}
 }
 
-export default withRouter(withStore(OnBoardingPage));
+export default withRouter(
+	withStore<OnBoardingPageProps, { appIsInited: boolean; screen: AppState; isLoading: boolean }>(
+		OnBoardingPage,
+		(state: AppState) => ({
+			appIsInited: state.appIsInited,
+			screen: state.screen,
+			isLoading: state.isLoading,
+		})
+	)
+);

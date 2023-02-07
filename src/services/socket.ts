@@ -1,9 +1,8 @@
-import { EventBus } from 'core';
 import { chatsAPI, ChatMessageDTO } from 'api';
 import { transformChatMessage } from 'utils';
 
-class Socket extends EventBus {
-	socket: WebSocket | null = null;
+class Socket {
+	private socket: WebSocket | null = null;
 
 	public async connect(userID: number, chatID: number) {
 		if (this.socket) {
@@ -19,15 +18,20 @@ class Socket extends EventBus {
 			socket.addEventListener('open', () => {
 				console.log('Соединение установлено');
 
+				this.socket?.send(
+					JSON.stringify({
+						content: '0',
+						type: 'get old',
+					})
+				);
+
 				setInterval(() => {
 					this.socket?.send(
 						JSON.stringify({
 							type: 'ping',
 						})
 					);
-				}, 5000);
-
-				window.store.dispatch({ socket, messages: this.getMessages() });
+				}, 15000);
 			});
 
 			socket.addEventListener('close', (e) => {
@@ -45,11 +49,9 @@ class Socket extends EventBus {
 					const data: ChatMessageDTO[] | ChatMessageDTO = JSON.parse(e.data);
 					console.log('Получены данные', data);
 
-					// Переписать!
 					if (Array.isArray(data)) {
-						const filteredMessages = data.filter((message) => message.content) || [];
-						const messages = filteredMessages
-							.map((data) => transformChatMessage(data))
+						const messages = data
+							.map((message) => transformChatMessage(message))
 							.sort((a, b) => b.id - a.id);
 
 						window.store.dispatch({
@@ -63,23 +65,11 @@ class Socket extends EventBus {
 					}
 
 					if (data.type === 'message' && data.content) {
-						// const messageElem = document.createElement('div');
+						const newMessage = transformChatMessage(data);
+						const oldMessages = window.store.getState().messages as ChatMessage[];
 
-						// const el = this.printMessage(transformChatMessage(data));
-						// messageElem.insertAdjacentHTML('afterbegin', el);
-
-						// const mainDiv = document.querySelector('.chat-box__main');
-						// mainDiv?.append(messageElem);
-
-						// // Обновляем Store для перерендера компонента (очистки input)
-						// window.store.dispatch({
-						// 	isLoading: false,
-						// });
-
-						// Закомментирован вариант, в котором нужно доработать очистку инпута.
-						// Оставлен - рабочий вариант, но времязатратный
 						window.store.dispatch({
-							messages: this.getMessages(),
+							messages: [...oldMessages, newMessage],
 						});
 					}
 				} catch (err) {
@@ -90,25 +80,10 @@ class Socket extends EventBus {
 					}
 				}
 			});
-
-			socket.addEventListener('error', (e) => {
-				// @ts-ignore
-				console.log('Ошибка', e.message);
-			});
 		});
 	}
 
-	private getMessages() {
-		console.log('Загружаем сообщения');
-		return this.socket?.send(
-			JSON.stringify({
-				content: '0',
-				type: 'get old',
-			})
-		);
-	}
-
-	sendMessage(message: string) {
+	public sendMessage(message: string) {
 		console.log('Отправляем сообщение');
 		this.socket?.send(
 			JSON.stringify({
@@ -116,20 +91,7 @@ class Socket extends EventBus {
 				type: 'message',
 			})
 		);
-		// this.getMessages();
 	}
-
-	// private printMessage(message: ChatMessage) {
-	// 	return `
-	// 	<div class="message__wrapper message__${
-	// 		message.userId === window.store.getState().user?.id ? 'out' : 'in'
-	// 	}">
-	// 		<div class="message__message">${message.content}</div>
-	// 		<time class="message__time time__${
-	// 			message.userId === window.store.getState().user?.id ? 'out' : 'in'
-	// 		}">${message.time}<time>
-	// 	</div>`;
-	// }
 }
 
 export default new Socket();

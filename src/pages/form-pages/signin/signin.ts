@@ -2,10 +2,10 @@ import { Block, CoreRouter, Store, BlockProps } from 'core';
 import { validateForm, withRouter, withStore } from 'utils';
 import { signin } from 'services';
 
-type SigninPageProps = {
+type SigninPageProps = Partial<AppState> & {
 	router: CoreRouter;
 	store: Store<AppState>;
-	onSignin?: () => void;
+	onSignin?: (e: SubmitEvent) => void;
 	toSignup?: () => void;
 	formError?: () => void;
 };
@@ -16,19 +16,23 @@ class SigninPage extends Block<SigninPageProps> {
 		super(props);
 
 		this.setProps({
-			onSignin: () => this.onSignin(),
+			onSignin: (e: SubmitEvent) => this.onSignin(e),
 			toSignup: () => this.toSignup(),
 			formError: () => this.displayError(),
 		});
 	}
 
-	onSignin() {
+	componentDidUpdate() {
+		return window.store.getState().screen === 'sign-in';
+	}
+
+	onSignin(e: SubmitEvent) {
+		e.preventDefault();
 		const formData: Record<string, unknown> = {};
 		let errors = false;
 
 		Object.values(this.refs).forEach((ref: Block<BlockProps>) => {
-			// @ts-ignore
-			const inputEl = ref.refs.inputRef.getContent() as HTMLInputElement;
+			const inputEl = ref.getRefs().inputRef.getContent() as HTMLInputElement;
 
 			formData[inputEl.name] = inputEl.value;
 
@@ -38,14 +42,13 @@ class SigninPage extends Block<SigninPageProps> {
 				errors = true;
 			}
 
-			// @ts-ignore
-			ref.refs.errorRef.setProps({
+			ref.getRefs().errorRef.setProps({
 				errorText: errorText,
 			});
 		});
 
 		if (errors === false && formData) {
-			this.props.store.dispatch(signin, formData);
+			window.store.dispatch(signin, formData);
 		}
 	}
 
@@ -54,7 +57,7 @@ class SigninPage extends Block<SigninPageProps> {
 	}
 
 	displayError() {
-		const error = this.props.store.getState().loginFormError;
+		const error = this.props.loginFormError;
 		if (error === 'User already in system') {
 			return 'Вы уже вошли';
 		}
@@ -67,19 +70,20 @@ class SigninPage extends Block<SigninPageProps> {
 
 	render() {
 		return `
-			<main class='form-page signin'>
-				<div class='form-page__container'>
-					<h1 class='form-page__title'>Вход</h1>
-					<form class='form-page__form'>
+			<main class="form-page signin" data-testid="signin-screen">
+				{{{Loader}}}
+				<div class="form-page__container">
+					<h1 class="form-page__title">Вход</h1>
+					<form class="form-page__form">
 						<div class="form-page__inputs">
 							{{{ControlledInput
-								ref='login'
-								label='Логин'
-								type='text'
-								name='login'
-								placeholder='Логин'
-								controlledInputClassName='controlled-input'
-								inputClassName='input__input'
+								ref="login"
+								label="Логин"
+								type="text"
+								name="login"
+								placeholder="Логин"
+								controlledInputClassName="controlled-input"
+								inputClassName="input__input"
 							}}}
 							{{{ControlledInput
 								ref="oldPassword"
@@ -116,6 +120,21 @@ class SigninPage extends Block<SigninPageProps> {
 	}
 }
 
-const ComposedSignin = withRouter(withStore(SigninPage));
+const ComposedSignin = withRouter(
+	withStore<
+		SigninPageProps,
+		{
+			user: Nullable<User>;
+			loginFormError: Nullable<string>;
+			appIsInited: boolean;
+			screen: AppState;
+		}
+	>(SigninPage, (state: AppState) => ({
+		appIsInited: state.appIsInited,
+		screen: state.screen,
+		user: state.user,
+		loginFormError: state.loginFormError,
+	}))
+);
 
 export { ComposedSignin as SigninPage };

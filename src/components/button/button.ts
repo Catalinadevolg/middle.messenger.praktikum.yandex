@@ -6,6 +6,7 @@ type ButtonProps = BlockProps & {
 	text?: string;
 	type?: 'submit' | 'button';
 	onClick?: () => void;
+	dataTestId?: string;
 };
 export class Button extends Block<ButtonProps> {
 	static componentName = 'Button';
@@ -16,7 +17,7 @@ export class Button extends Block<ButtonProps> {
 
 	render(): string {
 		return `
-		<button class="{{buttonClass}}" type="{{type}}">
+		<button class="{{buttonClass}}" type="{{type}}" {{#if dataTestId}}data-testid="{{dataTestId}}"{{/if}}>
 			{{#if text}}<div class="{{textClass}}">{{text}}</div>{{/if}}
 		</button>
 		`;

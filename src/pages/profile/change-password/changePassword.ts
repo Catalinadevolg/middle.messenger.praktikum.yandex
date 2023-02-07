@@ -2,11 +2,11 @@ import { Block, CoreRouter, Store, BlockProps } from 'core';
 import { changePassword } from 'services';
 import { validateForm, withRouter, withStore } from 'utils';
 
-type ChangePasswordPageProps = {
+type ChangePasswordPageProps = Partial<AppState> & {
 	router: CoreRouter;
 	store: Store<AppState>;
 	toChats: () => void;
-	savePassword?: () => void;
+	savePassword?: (e: SubmitEvent) => void;
 	cancelChangePassword?: () => void;
 	formError?: () => void;
 };
@@ -15,31 +15,29 @@ class ChangePasswordPage extends Block<ChangePasswordPageProps> {
 	constructor(props: ChangePasswordPageProps) {
 		super(props);
 
-		Object.values(this.refs).forEach((ref: any) => {
-			ref.refs.inputRef.setProps({
-				value: '',
-			});
-		});
-
 		this.setProps({
 			toChats: () => this.toChats(),
-			savePassword: () => this.savePassword(),
+			savePassword: (e: SubmitEvent) => this.savePassword(e),
 			cancelChangePassword: () => this.cancelChangePassword(),
 			formError: () => this.displayError(),
 		});
+	}
+
+	componentDidUpdate() {
+		return window.store.getState().screen === 'password';
 	}
 
 	toChats() {
 		this.props.router.go('/messenger');
 	}
 
-	savePassword() {
+	savePassword(e: SubmitEvent) {
+		e.preventDefault();
 		const formData: Record<string, unknown> = {};
 		let errors = false;
 
 		Object.values(this.refs).forEach((ref: Block<BlockProps>) => {
-			// @ts-ignore
-			const inputEl = ref.refs.inputRef.getContent() as HTMLInputElement;
+			const inputEl = ref.getRefs().inputRef.getContent() as HTMLInputElement;
 
 			let errorText = validateForm(inputEl.name, inputEl.value);
 
@@ -55,19 +53,18 @@ class ChangePasswordPage extends Block<ChangePasswordPageProps> {
 				errors = true;
 			}
 
-			// @ts-ignore
-			ref.refs.errorRef.setProps({
+			ref.getRefs().errorRef.setProps({
 				errorText: errorText,
 			});
 		});
 
 		if (errors === false && formData) {
-			this.props.store.dispatch(changePassword, formData);
+			window.store.dispatch(changePassword, formData);
 		}
 	}
 
 	displayError() {
-		const error = this.props.store.getState().loginFormError;
+		const error = this.props.loginFormError;
 		if (error === 'Password is incorrect') {
 			return 'Старый пароль введён некорректно';
 		}
@@ -80,10 +77,11 @@ class ChangePasswordPage extends Block<ChangePasswordPageProps> {
 	}
 
 	render() {
-		const user = this.props.store.getState().user;
+		const user = this.props.user;
 
 		return `
-			<div class="profile__container">
+			<div class="profile__container" data-testid="password-screen">
+				{{{Loader}}}
 				<div class="profile__back-btn">
 					{{{Button
 						buttonClass="back-btn"
@@ -111,7 +109,6 @@ class ChangePasswordPage extends Block<ChangePasswordPageProps> {
 									onInput=onInput
 									onBlur=onBlur
 									onFocus=onFocus
-									value=""
 								}}}
 								{{{ProfileLine
 									label="Новый пароль"
@@ -166,6 +163,21 @@ class ChangePasswordPage extends Block<ChangePasswordPageProps> {
 	}
 }
 
-const ComposedChangePassword = withRouter(withStore(ChangePasswordPage));
+const ComposedChangePassword = withRouter(
+	withStore<
+		ChangePasswordPageProps,
+		{
+			user: Nullable<User>;
+			loginFormError: Nullable<string>;
+			appIsInited: boolean;
+			screen: AppState;
+		}
+	>(ChangePasswordPage, (state: AppState) => ({
+		appIsInited: state.appIsInited,
+		screen: state.screen,
+		user: state.user,
+		loginFormError: state.loginFormError,
+	}))
+);
 
 export { ComposedChangePassword as ChangePasswordPage };

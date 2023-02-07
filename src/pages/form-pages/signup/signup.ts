@@ -2,10 +2,10 @@ import { Block, CoreRouter, Store, BlockProps } from 'core';
 import { validateForm, withRouter, withStore } from 'utils';
 import { signup } from 'services';
 
-type SignupPageProps = {
+type SignupPageProps = Partial<AppState> & {
 	router: CoreRouter;
 	store: Store<AppState>;
-	onSignup?: () => void;
+	onSignup?: (e: SubmitEvent) => void;
 	toSignin?: () => void;
 	formError?: () => void;
 };
@@ -15,14 +15,18 @@ class SignupPage extends Block<SignupPageProps> {
 		super(props);
 
 		this.setProps({
-			onSignup: () => this.onSignup(),
+			onSignup: (e: SubmitEvent) => this.onSignup(e),
 			toSignin: () => this.toSignin(),
 			formError: () => this.displayError(),
 		});
 	}
 
+	componentDidUpdate() {
+		return window.store.getState().screen === 'sign-up';
+	}
+
 	displayError() {
-		const error = this.props.store.getState().loginFormError;
+		const error = this.props.loginFormError;
 		if (error === 'Login already exists') {
 			return 'Логин уже существует';
 		}
@@ -33,13 +37,13 @@ class SignupPage extends Block<SignupPageProps> {
 		return error;
 	}
 
-	onSignup() {
+	onSignup(e: SubmitEvent) {
+		e.preventDefault();
 		const formData: Record<string, unknown> = {};
 		let errors = false;
 
 		Object.values(this.refs).forEach((ref: Block<BlockProps>) => {
-			// @ts-ignore
-			const inputEl = ref.refs.inputRef.getContent() as HTMLInputElement;
+			const inputEl = ref.getRefs().inputRef.getContent() as HTMLInputElement;
 
 			formData[inputEl.name] = inputEl.value;
 
@@ -49,14 +53,13 @@ class SignupPage extends Block<SignupPageProps> {
 				errors = true;
 			}
 
-			// @ts-ignore
-			ref.refs.errorRef.setProps({
+			ref.getRefs().errorRef.setProps({
 				errorText: errorText,
 			});
 		});
 
 		if (errors === false && formData) {
-			this.props.store.dispatch(signup, formData);
+			window.store.dispatch(signup, formData);
 		}
 	}
 
@@ -67,6 +70,7 @@ class SignupPage extends Block<SignupPageProps> {
 	render() {
 		return `
 		<main class="form-page signup">
+			{{{Loader}}}
 			<div class="form-page__container">
 				<h1 class="form-page__title">Регистрация</h1>
 				<form class="form-page__form">
@@ -160,6 +164,21 @@ class SignupPage extends Block<SignupPageProps> {
 	}
 }
 
-const ComposedSignup = withRouter(withStore(SignupPage));
+const ComposedSignup = withRouter(
+	withStore<
+		SignupPageProps,
+		{
+			user: Nullable<User>;
+			loginFormError: Nullable<string>;
+			appIsInited: boolean;
+			screen: AppState;
+		}
+	>(SignupPage, (state: AppState) => ({
+		appIsInited: state.appIsInited,
+		screen: state.screen,
+		user: state.user,
+		loginFormError: state.loginFormError,
+	}))
+);
 
 export { ComposedSignup as SignupPage };

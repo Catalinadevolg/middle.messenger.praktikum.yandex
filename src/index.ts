@@ -1,14 +1,14 @@
-import { renderDOM } from 'core/renderDOM';
+import 'regenerator-runtime/runtime';
+
 import { registerComponent } from 'core/registerComponent';
 import { defaultState } from './store';
 import { Store } from 'core/store';
-// import { store } from './store';
 import { PathRouter } from 'core/router/pathRouter';
 import { CoreRouter } from 'core/router/coreRouter';
 import { initRouter } from './router';
 import { initApp } from './services/initApp';
 
-import OnBoardingPage from './pages/onboarding';
+import './styles/main.css';
 
 import * as components from 'components';
 
@@ -33,14 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	 */
 	window.router = router;
 	window.store = store;
-
-	renderDOM(new OnBoardingPage({}));
-
-	store.on('changed', (prevState, nextState) => {
-		if (process.env.DEBUG) {
-			console.log('%cstore updated', 'background: #222; color: #bada55', nextState);
-		}
-	});
 
 	/**
 	 * Инициализируем роутер

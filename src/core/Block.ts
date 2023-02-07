@@ -10,7 +10,6 @@ export interface BlockClass<P extends Record<string, unknown>> extends Function 
 	componentName?: string;
 }
 
-// @ts-ignore
 export class Block<P extends BlockProps = BlockProps> {
 	static EVENTS = {
 		INIT: 'init',
@@ -22,41 +21,28 @@ export class Block<P extends BlockProps = BlockProps> {
 
 	public id = nanoid(6);
 	protected _element: Nullable<HTMLElement> = null;
-	// @ts-ignore
-	private _meta: { props: P };
 
-	protected readonly props: P;
+	protected props: Readonly<P>;
 	protected children: { [id: string]: Block } = {};
-	private eventBus: () => EventBus<Events>;
 
+	eventBus: () => EventBus<Events>;
+
+	/**
+	 * @deprecated Не использовать, использовать this.props
+	 */
 	protected state: any = {};
 	protected refs: { [key: string]: Block } = {};
 
 	public static componentName?: string;
+	public static routePath?: string;
 
-	/** JSDoc
-	 * @param {string} tagName
-	 * @param {Object} props
-	 *
-	 * @returns {void}
-	 */
-	public constructor(propsAndChildren: P = {} as P) {
+	public constructor(props?: P) {
 		const eventBus = new EventBus<Events>();
-
-		const { props, children } = this.getPropsAndChildren(propsAndChildren);
-
-		this.children = children;
-
-		this._meta = {
-			props,
-		};
 
 		this.getStateFromProps(props);
 
-		this.props = this._makePropsProxy(props || ({} as P));
+		this.props = props || ({} as P);
 		this.state = this._makePropsProxy(this.state);
-
-		this.initChildren();
 
 		this.eventBus = () => eventBus;
 
@@ -79,23 +65,6 @@ export class Block<P extends BlockProps = BlockProps> {
 		this.eventBus().emit(Block.EVENTS.FLOW_CWU, this.props);
 	}
 
-	getPropsAndChildren(propsAndChildren: P) {
-		const children: Record<Keys<P>, Block> = {} as Record<Keys<P>, Block>;
-		const props: P = {} as P;
-
-		(Object.entries(propsAndChildren) as Array<[Keys<P>, any]>).forEach(([key, value]) => {
-			if (value instanceof Block) {
-				children[key] = value;
-			} else {
-				props[key] = value;
-			}
-		});
-
-		return { props, children };
-	}
-
-	protected initChildren() {}
-
 	_registerEvents(eventBus: EventBus<Events>) {
 		eventBus.on(Block.EVENTS.INIT, this.init.bind(this));
 		eventBus.on(Block.EVENTS.FLOW_CDM, this._componentDidMount.bind(this));
@@ -108,7 +77,7 @@ export class Block<P extends BlockProps = BlockProps> {
 		this._element = this._createDocumentElement('div');
 	}
 
-	protected getStateFromProps(_props: P): void {
+	protected getStateFromProps(_props: P | undefined): void {
 		this.state = {};
 	}
 
@@ -118,10 +87,11 @@ export class Block<P extends BlockProps = BlockProps> {
 	}
 
 	_componentDidMount(props: P) {
+		this._checkInDom();
+
 		this.componentDidMount(props);
 	}
 
-	// Может переопределять пользователь, необязательно трогать
 	componentDidMount(_props: P) {}
 
 	_componentWillUnmount() {
@@ -131,31 +101,33 @@ export class Block<P extends BlockProps = BlockProps> {
 
 	componentWillUnmount() {}
 
-	dispatchComponentDidMoun() {
-		this.eventBus().emit(Block.EVENTS.FLOW_CDM);
-	}
-
 	_componentDidUpdate(oldProps: P, newProps: P) {
 		const response = this.componentDidUpdate(oldProps, newProps);
 		if (!response) {
 			return;
 		}
 
-		this._render();
+		this.eventBus().emit(Block.EVENTS.FLOW_RENDER, this.props);
 	}
 
-	// Может переопределять пользователь, необязательно трогать
 	componentDidUpdate(_oldProps: P, _newProps: P) {
 		return true;
 	}
 
-	setProps = (nextProps: Partial<P>) => {
-		if (!nextProps) {
+	setProps = (nextPartialProps: Partial<P>) => {
+		if (!nextPartialProps) {
 			return;
 		}
 
-		Object.assign(this.props, nextProps);
+		const prevProps = this.props;
+		const nextProps = { ...prevProps, ...nextPartialProps };
+		this.props = nextProps;
+
+		this.eventBus().emit(Block.EVENTS.FLOW_CDU, prevProps, nextProps);
 	};
+
+	getProps = () => this.props;
+	getRefs = () => this.refs;
 
 	setState = (nextState: any) => {
 		if (!nextState) {
@@ -172,12 +144,13 @@ export class Block<P extends BlockProps = BlockProps> {
 	_render() {
 		const templateString = this.render();
 
-		const fragment = this.compile(templateString, { ...this.state, ...this.props });
+		const fragment = this._compile(templateString, { ...this.state, ...this.props });
 
 		const newElement = fragment.firstElementChild as HTMLElement;
 
+		this._removeEvents();
+
 		if (this._element) {
-			this._removeEvents();
 			this._element.replaceWith(newElement);
 		}
 
@@ -186,7 +159,6 @@ export class Block<P extends BlockProps = BlockProps> {
 		this._addEvents();
 	}
 
-	// Может переопределять пользователь, необязательно трогать
 	protected render(): string {
 		return '';
 	}
@@ -222,7 +194,7 @@ export class Block<P extends BlockProps = BlockProps> {
 			deleteProperty() {
 				throw new Error('Нет доступа');
 			},
-		});
+		}) as unknown as P;
 	}
 
 	_createDocumentElement(tagName: string) {
@@ -253,23 +225,8 @@ export class Block<P extends BlockProps = BlockProps> {
 		});
 	}
 
-	// _createDocumentElement(tagName: string): HTMLElement {
-	// 	// Можно сделать метод, который через фрагменты в цикле создаёт сразу несколько блоков
-	// 	return document.createElement(tagName);
-	// }
-
-	compile(templateString: string, context: any): DocumentFragment {
+	_compile(templateString: string, context: any): DocumentFragment {
 		const fragment = document.createElement('template');
-
-		Object.entries(this.children).forEach(([key, child]) => {
-			if (Array.isArray(child)) {
-				context[key] = child.map((ch) => `<div data-id="id-${ch.id}"></div>`);
-
-				return;
-			}
-
-			context[key] = `<div data-id="id-${child.id}"></div>`;
-		});
 
 		/**
 		 * Рендерим шаблон
@@ -283,37 +240,41 @@ export class Block<P extends BlockProps = BlockProps> {
 		});
 
 		fragment.innerHTML = htmlString;
+
 		/**
 		 * Заменяем заглушки на компоненты
 		 */
-		Object.entries(this.children).forEach(([id, child]) => {
+		Object.entries(this.children).forEach(([id, component]) => {
 			/**
 			 * Ищем заглушку по id
 			 */
-			const stub = fragment.content.querySelector(`[data-id="id-${id}"]`);
+			const stub = fragment.content.querySelector(`[data-id="${id}"]`);
 
 			if (!stub) {
 				return;
 			}
 
+			const stubChilds = stub.childNodes.length ? stub.childNodes : [];
+
 			/**
 			 * Заменяем заглушку на component._element
 			 */
-			const content = child.getContent();
+			const content = component.getContent();
 			stub.replaceWith(content);
+
+			/**
+			 * Ищем элемент layout-а, куда вставлять детей
+			 */
+			const layoutContent = content.querySelector('[data-layout="1"]');
+
+			if (layoutContent && stubChilds.length) {
+				layoutContent.append(...stubChilds);
+			}
 		});
 
 		/**
 		 * Возвращаем фрагмент
 		 */
 		return fragment.content;
-	}
-
-	show() {
-		this.getContent()!.style.display = 'block';
-	}
-
-	hide() {
-		this.getContent()!.style.display = 'none';
 	}
 }

@@ -14,6 +14,8 @@ export const chatsAPI = {
 
 	createChat: (data: NewChatRequestData) => HTTPTransport.post('/chats', { data }),
 
+	deleteChat: (data: number) => HTTPTransport.delete('/chats', { data }),
+
 	getChatUsers: (data: number) => HTTPTransport.get(`/chats/${data}/users`),
 
 	getToken: (chatID: number) => HTTPTransport.post(`/chats/token/${chatID}`),
