@@ -12,7 +12,8 @@
 		"lint:css": "prettier --list-different \"**/*.css\" && stylelint \"**/*.css\"",
 		"test": "jest",
 		"pre-commit": "npm-run-all lint lint:css test",
-		"prepare": "husky install"
+		"prepare": "husky install",
+		"docker": "docker run -d -p 3000:3000 --rm practicum"
 	},
 	"alias": {
 		"core": "./src/core",
