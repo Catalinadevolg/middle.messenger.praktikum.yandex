@@ -4,7 +4,7 @@ import { getChats } from 'services';
 
 import defaultAvatar from 'assets/empty-avatar.png';
 
-type MessengerPageProps = {
+type MessengerPageProps = Partial<AppState> & {
 	router: CoreRouter;
 	store: Store<AppState>;
 	toProfile?: () => void;
@@ -25,9 +25,13 @@ class MessengerPage extends Block<MessengerPageProps> {
 
 	async componentDidMount() {
 		console.log('Загружаем чаты');
-		if (!this.props.store.getState().chats) {
-			await this.props.store.dispatch(getChats);
+		if (!this.props.chats) {
+			await window.store.dispatch(getChats);
 		}
+	}
+
+	componentDidUpdate() {
+		return window.store.getState().screen === 'messenger';
 	}
 
 	toProfile() {
@@ -35,15 +39,17 @@ class MessengerPage extends Block<MessengerPageProps> {
 	}
 
 	openModalWindow() {
-		// @ts-ignore
-		this.refs.createChatModal.props.modalClassName = '_active';
+		this.refs.createChatModal.setProps({
+			modalClassName: '_active',
+		});
 	}
 
 	render() {
-		const state = this.props.store.getState();
+		const activeChat = this.props.activeChat;
 
 		return `
 			<main class="messenger">
+				{{{Loader}}}
 				<div class="chat-list">
 					<div class="chat-list__header">
 						<div class="chat-list__profile-link">
@@ -54,6 +60,7 @@ class MessengerPage extends Block<MessengerPageProps> {
 							}}}
 						</div>
 						{{{Button
+							ref="button"
 							buttonClass="button-wrapper"
 							textClass="button"
 							type="button"
@@ -67,11 +74,11 @@ class MessengerPage extends Block<MessengerPageProps> {
 					{{{ChatList}}}
 				</div>
 				${
-					state.activeChat
+					activeChat
 						? `
 					{{{ChatBoxItem
-						userAvatar="${state.activeChat.avatar ? state.activeChat.avatar : defaultAvatar}"
-						userName="${state.activeChat.title}"
+						userAvatar="${activeChat.avatar ? activeChat.avatar : defaultAvatar}"
+						userName="${activeChat.title}"
 					}}}
 				`
 						: `{{{ ChatPlug }}}`
@@ -84,6 +91,30 @@ class MessengerPage extends Block<MessengerPageProps> {
 	}
 }
 
-const ComposedMessenger = withRouter(withStore(MessengerPage));
+const ComposedMessenger = withRouter(
+	withStore<
+		MessengerPageProps,
+		{
+			user: Nullable<User>;
+			loginFormError: Nullable<string>;
+			appIsInited: boolean;
+			screen: AppState;
+			activeChat: {
+				id: Nullable<number>;
+				title: Nullable<string>;
+				avatar: Nullable<string>;
+				createdBy: Nullable<number>;
+			} | null;
+			chats: Nullable<Chat[]>;
+		}
+	>(MessengerPage, (state: AppState) => ({
+		appIsInited: state.appIsInited,
+		screen: state.screen,
+		user: state.user,
+		loginFormError: state.loginFormError,
+		activeChat: state.activeChat,
+		chats: state.chats,
+	}))
+);
 
 export { ComposedMessenger as MessengerPage };

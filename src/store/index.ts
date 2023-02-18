@@ -1,5 +1,3 @@
-import { Store } from 'core';
-
 export const defaultState: AppState = {
 	appIsInited: false,
 	screen: null,
@@ -9,8 +7,5 @@ export const defaultState: AppState = {
 	chats: null,
 	users: null,
 	messages: null,
-	socket: null,
 	activeChat: null,
 };
-
-// export const store = new Store(defaultState);

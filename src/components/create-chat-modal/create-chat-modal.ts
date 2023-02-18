@@ -1,14 +1,12 @@
-import { Block, BlockProps, Store } from 'core';
-import { withStore } from 'utils';
+import { Block, BlockProps } from 'core';
 import { createChat } from 'services';
 
 type CreateChatModalProps = BlockProps & {
-	store: Store<AppState>;
 	modalClassName: string;
 	createChat?: (e: Event) => void;
 	cancelCreating?: () => void;
 };
-class CreateChatModal extends Block<CreateChatModalProps> {
+export class CreateChatModal extends Block<CreateChatModalProps> {
 	static componentName = 'CreateChatModal';
 
 	constructor(props: CreateChatModalProps) {
@@ -30,18 +28,22 @@ class CreateChatModal extends Block<CreateChatModalProps> {
 			title: `${chatTitle}`,
 		};
 
-		this.props.store.dispatch(createChat, data);
+		window.store.dispatch(createChat, data);
 
-		this.props.modalClassName = '';
+		this.setProps({
+			modalClassName: '',
+		});
 	}
 
 	cancelCreating() {
-		this.props.modalClassName = '';
+		this.setProps({
+			modalClassName: '',
+		});
 	}
 
 	render() {
 		return `
-			<div class="creating-chat__modal${this.props.modalClassName}">
+			<div class="creating-chat__modal{{#if modalClassName}}{{modalClassName}}{{/if}}">
 				<div class="creating-chat__box">
 					<div class="creating-chat__box-container">
 						<form class="creating-chat__form">
@@ -70,7 +72,3 @@ class CreateChatModal extends Block<CreateChatModalProps> {
 		`;
 	}
 }
-
-const ComposedCreateChatModal = withStore(CreateChatModal);
-
-export { ComposedCreateChatModal as CreateChatModal };

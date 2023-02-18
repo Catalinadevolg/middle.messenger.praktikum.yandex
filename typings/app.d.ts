@@ -15,7 +15,6 @@ declare global {
 		chats: Nullable<Chat[]>;
 		users: Nullable<User[]>;
 		messages: Nullable<ChatMessage[]>;
-		socket: Nullable<WebSocket>;
 		activeChat: {
 			id: Nullable<number>;
 			title: Nullable<string>;

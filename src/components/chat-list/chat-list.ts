@@ -1,11 +1,12 @@
-import { Block, BlockProps, Store } from 'core';
+import { Block, Store } from 'core';
 import { withStore } from 'utils';
 import { getChatUsers } from 'services';
 import Socket from 'services/socket';
 
 import defaultAvatar from 'assets/empty-avatar.png';
+import { dateFormat } from 'utils/dateFormat';
 
-type ChatListProps = BlockProps & {
+type ChatListProps = Partial<AppState> & {
 	store: Store<AppState>;
 	onClickChat?: (e: FocusEvent) => void;
 };
@@ -29,7 +30,7 @@ class ChatList extends Block<ChatListProps> {
 			const chatDataId = selectedChat.getAttribute('data-id');
 			const chatID = Number(chatDataId!.split('-')[1]);
 
-			const chats = this.props.store.getState().chats;
+			const chats = this.props.chats;
 			const index = chats?.findIndex((chat) => chat.id === chatID);
 			const chatInfo = chats![index!];
 
@@ -38,7 +39,7 @@ class ChatList extends Block<ChatListProps> {
 			const createdBy = chatInfo.createdBy;
 
 			console.log('Загружаем чат');
-			this.props.store.dispatch({
+			await window.store.dispatch({
 				activeChat: {
 					id: chatID,
 					title: chatTitle,
@@ -48,17 +49,16 @@ class ChatList extends Block<ChatListProps> {
 			});
 
 			console.log('Загружаем пользователей');
-			this.props.store.dispatch(getChatUsers, chatID);
+			window.store.dispatch(getChatUsers, chatID);
 
 			// Подключаемся к Socket
-			const userID = this.props.store.getState().user!.id;
+			const userID = this.props.user!.id;
 			await Socket.connect(userID, chatID);
 		}
 	}
 
 	render() {
-		const state = this.props.store.getState();
-		const chats = state.chats;
+		const chats = this.props.chats;
 
 		return `
 			<div class="chat-list__list">
@@ -68,12 +68,16 @@ class ChatList extends Block<ChatListProps> {
 								.map((chat: Chat) => {
 									return `
 										{{{ChatListItem
-											blueClass="${chat.id === state.activeChat?.id ? 'item_active' : ''}"
+											blueClass="${chat.id === this.props.activeChat?.id ? 'item_active' : ''}"
 											dataID="${chat.id}"
 											userName="${chat.title}"
-											userAvatar="${chat.avatar ? chat.avatar : defaultAvatar}"
+											userAvatar="${
+												chat.avatar
+													? `https://ya-praktikum.tech/api/v2/resources${chat.avatar}`
+													: defaultAvatar
+											}"
 											lastMessage="${chat.lastMessage ? chat.lastMessage.content : ''}"
-											lastMessageDate="${chat.lastMessage ? chat.lastMessage.time.toLocaleTimeString() : ''}"
+											lastMessageDate="${chat.lastMessage ? dateFormat(chat.lastMessage.time, 'lastMessage') : ''}"
 											newMessagesCount="${chat.unreadCount ? chat.unreadCount : ''}"
 											onClick=onClickChat
 										}}}`;
@@ -87,6 +91,26 @@ class ChatList extends Block<ChatListProps> {
 	}
 }
 
-const ComposedChatList = withStore(ChatList);
+const ComposedChatList = withStore<
+	ChatListProps,
+	{
+		user: Nullable<User>;
+		loginFormError: Nullable<string>;
+		isLoading: boolean;
+		activeChat: {
+			id: Nullable<number>;
+			title: Nullable<string>;
+			avatar: Nullable<string>;
+			createdBy: Nullable<number>;
+		} | null;
+		chats: Nullable<Chat[]>;
+	}
+>(ChatList, (state: AppState) => ({
+	isLoading: state.isLoading,
+	user: state.user,
+	loginFormError: state.loginFormError,
+	activeChat: state.activeChat,
+	chats: state.chats,
+}));
 
 export { ComposedChatList as ChatList };

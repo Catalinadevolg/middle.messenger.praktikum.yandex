@@ -1,8 +1,9 @@
-import { Block, BlockProps, Store } from 'core';
+import { Block, Store } from 'core';
 import Socket from 'services/socket';
 import { withStore } from 'utils';
+import { dateFormat } from 'utils/dateFormat';
 
-type ChatBoxItemProps = BlockProps & {
+type ChatBoxItemProps = Partial<AppState> & {
 	store: Store<AppState>;
 	userAvatar: string;
 	userName: string;
@@ -19,18 +20,20 @@ class ChatBoxItem extends Block<ChatBoxItemProps> {
 		this.setProps({
 			activeModal: '',
 			openSettings: () => this.openSettings(),
-			activeChat: 1,
 			sendMessage: (e: SubmitEvent) => this.sendMessage(e),
 		});
 	}
 
 	openSettings() {
-		// @ts-ignore
-		const props = this.refs.bubbleMessenger.props;
+		const props = this.refs.bubbleMessenger.getProps();
 		if (!props.activeBubble) {
-			props.activeBubble = 'chat-menu__modal_active';
+			this.refs.bubbleMessenger.setProps({
+				activeBubble: 'chat-menu__modal_active',
+			});
 		} else {
-			props.activeBubble = '';
+			this.refs.bubbleMessenger.setProps({
+				activeBubble: '',
+			});
 		}
 	}
 
@@ -46,8 +49,7 @@ class ChatBoxItem extends Block<ChatBoxItemProps> {
 	}
 
 	render() {
-		const state = this.props.store.getState();
-		const messages = state.messages;
+		const messages = this.props.messages;
 
 		return `
 			<div class="chat-box_active">
@@ -74,8 +76,8 @@ class ChatBoxItem extends Block<ChatBoxItemProps> {
 													return `
 														{{{Message
 															message="${message.content}"
-															direction="${message.userId === state.user?.id ? 'out' : 'in'}"
-															time="${message.time}"
+															direction="${message.userId === this.props.user?.id ? 'out' : 'in'}"
+															time="${dateFormat(message.time, 'message')}"
 														}}}`;
 												})
 												.join('')
@@ -108,6 +110,19 @@ class ChatBoxItem extends Block<ChatBoxItemProps> {
 	}
 }
 
-const ComposedChatBoxItem = withStore(ChatBoxItem);
+const ComposedChatBoxItem = withStore<
+	ChatBoxItemProps,
+	{
+		loginFormError: Nullable<string>;
+		isLoading: boolean;
+		messages: Nullable<ChatMessage[]>;
+		user: Nullable<User>;
+	}
+>(ChatBoxItem, (state: AppState) => ({
+	isLoading: state.isLoading,
+	loginFormError: state.loginFormError,
+	messages: state.messages,
+	user: state.user,
+}));
 
 export { ComposedChatBoxItem as ChatBoxItem };

@@ -6,8 +6,8 @@ import { getScreenComponent, Screens } from './utils/screenList';
 const routes = [
 	{
 		path: '/',
-		block: Screens.Onboarding,
-		shouldAuthorized: false,
+		block: Screens.Messenger,
+		shouldAuthorized: true,
 	},
 	{
 		path: '/sign-in',

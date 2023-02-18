@@ -22,7 +22,6 @@ export const logout = async (dispatch: Dispatch<AppState>) => {
 
 	try {
 		await authAPI.logout();
-
 		dispatch({ isLoading: false, user: null });
 
 		window.router.go('/sign-in');
@@ -32,13 +31,16 @@ export const logout = async (dispatch: Dispatch<AppState>) => {
 	}
 };
 
-export const signin: DispatchStateHandler<SigninPayload> = async (dispatch, state, action) => {
+export const signin: DispatchStateHandler<SigninPayload> = async (dispatch, _state, action) => {
 	dispatch({ isLoading: true });
 
 	try {
 		const response = await authAPI.signin(action);
 
 		if (apiHasError(response)) {
+			if (response.reason === 'User already in system') {
+				window.router.go('/messenger');
+			}
 			dispatch({ isLoading: false, loginFormError: response.reason });
 			return;
 		}
@@ -61,7 +63,7 @@ export const signin: DispatchStateHandler<SigninPayload> = async (dispatch, stat
 	}
 };
 
-export const signup: DispatchStateHandler<SignupPayload> = async (dispatch, state, action) => {
+export const signup: DispatchStateHandler<SignupPayload> = async (dispatch, _state, action) => {
 	dispatch({ isLoading: true });
 
 	try {
